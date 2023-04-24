@@ -1,12 +1,16 @@
-package com.example.bookstorebackend.user.model;
+package com.example.bookstorebackend.person.model;
 
 import com.example.bookstorebackend.address.Address;
+import com.example.bookstorebackend.role.Role;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import com.example.bookstorebackend.utils.enums.Sex;
+
+import java.util.ArrayList;
+import java.util.Collection;
 
 @Entity
 @Getter
@@ -24,7 +28,9 @@ public abstract class Person {
     protected String lastname;
     protected String email;
     protected String password;
-    @OneToOne(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER)
+    protected Collection<Role> roles = new ArrayList<>();
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     protected Address address;
     protected String phone;
     protected String nationalId;
