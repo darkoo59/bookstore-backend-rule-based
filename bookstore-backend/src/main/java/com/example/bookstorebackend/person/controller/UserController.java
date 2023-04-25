@@ -13,8 +13,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.OK;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import java.io.IOException;
+
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.http.HttpStatus.*;
 
 @Controller
 @RequestMapping("/bookstore/user")
@@ -41,5 +47,33 @@ public class UserController {
             System.out.println(e.getMessage());
             return new ResponseEntity<>("Unknown error", BAD_REQUEST);
         }
+    }
+
+    @PostMapping("/token/refresh")
+    public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        try {
+            String accessToken = authUtility.createJWTFromRequest(request);
+            if (accessToken != null) {
+                response.setContentType(APPLICATION_JSON_VALUE);
+                AuthUtility.setResponseMessage(response, "accessToken", accessToken);
+            }
+            else {
+                response.setStatus(UNAUTHORIZED.value());
+                AuthUtility.setResponseMessage(response, "errorMessage", "Refresh token is missing");
+            }
+        } catch (Exception e) {
+            response.setStatus(UNAUTHORIZED.value());
+            AuthUtility.setResponseMessage(response, "errorMessage", e.getMessage());
+        }
+    }
+
+    @PostMapping("/logout")
+    public void logout(HttpServletResponse response) throws IOException {
+        Cookie jwtCookie = new Cookie("refreshToken", "");
+        jwtCookie.setMaxAge(0);
+        jwtCookie.setDomain("localhost");
+        jwtCookie.setPath("/");
+        response.addCookie(jwtCookie);
+        AuthUtility.setResponseMessage(response, "Success", "Cookie removed");
     }
 }

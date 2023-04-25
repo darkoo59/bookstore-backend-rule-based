@@ -1,7 +1,9 @@
 package com.example.bookstorebackend.security.filter;
 
 import com.auth0.jwt.JWT;
+import com.example.bookstorebackend.person.dto.LoginDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import jakarta.servlet.ServletException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.DisabledException;
@@ -33,10 +35,16 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
 
     @Override
     public Authentication attemptAuthentication(jakarta.servlet.http.HttpServletRequest request, jakarta.servlet.http.HttpServletResponse response) throws AuthenticationException {
-        String username = request.getParameter("email");
-        String password = request.getParameter("password");
+        LoginDTO loginDTO;
+        try {
+            loginDTO = new Gson().fromJson(request.getReader(), LoginDTO.class);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        System.out.println(loginDTO.getEmail());
+        System.out.println(loginDTO.getPassword());
         UsernamePasswordAuthenticationToken authenticationToken =
-                new UsernamePasswordAuthenticationToken(username, password);
+                new UsernamePasswordAuthenticationToken(loginDTO.getEmail(), loginDTO.getPassword());
         return authenticationManager.authenticate(authenticationToken);
     }
 
@@ -74,11 +82,7 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
             HttpServletResponse response,
             AuthenticationException failed) throws IOException {
         Map<String, String> error = new HashMap<>();
-        if (failed instanceof DisabledException) {
-            error.put("errorMessage", "Email address not confirmed");
-        } else {
-            error.put("errorMessage", "Incorrect email or password");
-        }
+        error.put("errorMessage", "Incorrect email or password");
         response.setContentType(APPLICATION_JSON_VALUE);
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         new ObjectMapper().writeValue(response.getOutputStream(), error);

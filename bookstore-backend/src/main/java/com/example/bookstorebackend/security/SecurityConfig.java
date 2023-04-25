@@ -56,7 +56,8 @@ public class SecurityConfig {
                 "/bookstore/user/login",
                 "/bookstore/user/token/refresh",
                 "/bookstore/user/register",
-                "/bookstore/user/logout"
+                "/bookstore/user/logout",
+                "/bookstore/book"
         ).permitAll();
         http.authorizeRequests().anyRequest().authenticated();
         http.addFilter(customAuthenticationFilter);
