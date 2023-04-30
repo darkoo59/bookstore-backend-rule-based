@@ -11,4 +11,5 @@ public class BookService {
     private final BookRepository bookRepository;
 
     public List<Book> getAll() { return this.bookRepository.findAll(); }
+    public Book getById(long id) { return this.bookRepository.findById(id).get();}
 }

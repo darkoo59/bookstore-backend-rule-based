@@ -14,11 +14,10 @@ public class RegisterDTO {
     public String lastname;
     public String email;
     public String password;
-    public String confirmPassword;
     public AddressDTO address;
     public String phone;
     public String nationalId;
-    public Sex sex;
+    public Sex gender;
     public String occupation;
     public String information;
 }

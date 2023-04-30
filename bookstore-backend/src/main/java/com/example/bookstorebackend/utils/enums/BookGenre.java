@@ -6,5 +6,6 @@ public enum BookGenre {
     ROMANCE,
     THRILLER,
     SCIENCE_FICTION,
-    FANTASY
+    FANTASY,
+    EDUCATIONAL
 }
