@@ -34,7 +34,7 @@ public abstract class Person {
     protected Address address;
     protected String phone;
     protected String nationalId;
-    protected Sex sex;
+    protected Sex gender;
     protected String occupation;
     protected String information;
 }

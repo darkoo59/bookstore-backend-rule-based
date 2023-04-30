@@ -22,4 +22,5 @@ public class Book {
     private String publisher;
     private BookGenre genre;
     private int numberOfPages;
+    private double price;
 }

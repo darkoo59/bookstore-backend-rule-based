@@ -19,7 +19,7 @@ public class ObjectsMapper {
                 map().setPassword(source.getPassword());
                 map().setPhone(source.getPhone());
                 map().setNationalId(source.getNationalId());
-                map().setSex(source.getSex());
+                map().setGender(source.getGender());
                 map().setOccupation(source.getOccupation());
                 map().setInformation(source.getInformation());
             }
