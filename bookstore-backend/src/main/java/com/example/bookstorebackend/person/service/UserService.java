@@ -49,7 +49,6 @@ public class UserService {
     }
     public void registerUser(RegisterDTO registerDTO) throws EmailExistsException{
         User user = ObjectsMapper.convertRegisterDTOToUser(registerDTO);
-        System.out.println(user.getAddress().getCity());
         boolean emailExists = userRepository.findByEmail(user.getEmail()).isPresent();
         if (emailExists) {
             throw new EmailExistsException();
@@ -59,10 +58,6 @@ public class UserService {
             role = new Role(0l, "ROLE_USER");
             roleRepository.save(role);
         }
-//        Address address = user.getAddress();
-//        address.setId(addressService.generateId());
-//        addressService.save(address);
-//        user.setAddress(address);
         saveUser(user);
         addRoleToUser(user.getEmail(), role.getName());
 

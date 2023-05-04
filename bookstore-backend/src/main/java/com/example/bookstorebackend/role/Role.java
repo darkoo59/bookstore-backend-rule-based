@@ -10,7 +10,6 @@ import static jakarta.persistence.GenerationType.AUTO;
 
 @Entity
 @NoArgsConstructor
-@AllArgsConstructor
 @Getter
 @Setter
 public class Role {
@@ -18,4 +17,15 @@ public class Role {
     @GeneratedValue(strategy = AUTO)
     private Long id;
     private String name;
+
+    public Role(Long id, String name)
+    {
+        this.id = id;
+        this.name = name;
+    }
+
+    public Role(String name)
+    {
+        this.name = name;
+    }
 }
