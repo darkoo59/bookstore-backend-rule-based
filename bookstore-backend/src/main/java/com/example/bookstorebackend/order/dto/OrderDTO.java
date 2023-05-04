@@ -1,6 +1,5 @@
-package com.example.bookstorebackend.order;
+package com.example.bookstorebackend.order.dto;
 
-import com.example.bookstorebackend.book.Book;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

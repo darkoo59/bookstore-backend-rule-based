@@ -8,14 +8,15 @@ import com.example.bookstorebackend.security.filter.AuthUtility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 
@@ -44,12 +45,13 @@ public class UserController {
         } catch (EmailExistsException e) {
             return new ResponseEntity<>(e.getMessage(), BAD_REQUEST);
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+
             return new ResponseEntity<>("Unknown error", BAD_REQUEST);
         }
     }
 
     @PostMapping("/token/refresh")
+    //@Secured("ROLE_USER")
     public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
             String accessToken = authUtility.createJWTFromRequest(request);

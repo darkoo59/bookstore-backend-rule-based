@@ -41,8 +41,6 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        System.out.println(loginDTO.getEmail());
-        System.out.println(loginDTO.getPassword());
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(loginDTO.getEmail(), loginDTO.getPassword());
         return authenticationManager.authenticate(authenticationToken);
@@ -53,7 +51,7 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
         User user = (User)authResult.getPrincipal();
         String accessToken = JWT.create()
                 .withSubject(user.getUsername())
-                .withExpiresAt(new Date(System.currentTimeMillis() + 30 * 1000))    // 30 seconds
+                .withExpiresAt(new Date(System.currentTimeMillis() + 30 * 1000 * 120))    // 1 hour
                 .withIssuer(request.getRequestURL().toString())
                 .withClaim("roles", user.getAuthorities().stream().
                         map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
