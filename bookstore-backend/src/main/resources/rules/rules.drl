@@ -1,0 +1,11 @@
+package rules;
+
+import com.example.bookstorebackend.book.Book;
+
+rule "Test - book price must be positive"
+    when
+        $b: Book(price < 0)
+    then
+        modify($b){setPrice(1)}
+end;
+
