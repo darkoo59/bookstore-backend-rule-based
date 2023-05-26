@@ -1,5 +1,6 @@
 package com.example.bookstorebackend.config;
 
+import com.example.bookstorebackend.person.model.Author;
 import org.kie.api.KieServices;
 import org.kie.api.builder.KieBuilder;
 import org.kie.api.builder.KieFileSystem;
@@ -8,6 +9,8 @@ import org.kie.api.runtime.KieContainer;
 import org.kie.internal.io.ResourceFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.PriorityQueue;
 
 @Configuration
 public class DroolsConfig {
@@ -19,6 +22,7 @@ public class DroolsConfig {
 
         KieFileSystem kieFileSystem = kieServices.newKieFileSystem();
         kieFileSystem.write(ResourceFactory.newClassPathResource(baseDrlFile));
+        kieFileSystem.write(ResourceFactory.newClassPathResource("rules/book-recommendations-with-favourites.drl"));
         KieBuilder kieBuilder = kieServices.newKieBuilder(kieFileSystem);
         kieBuilder.buildAll();
         KieModule kieModule = kieBuilder.getKieModule();

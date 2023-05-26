@@ -1,12 +1,10 @@
 package com.example.bookstorebackend.order;
 
-import com.example.bookstorebackend.book.Book;
 import com.example.bookstorebackend.book.BookService;
 import com.example.bookstorebackend.order.dto.*;
 import com.example.bookstorebackend.order.model.Order;
 import com.example.bookstorebackend.orderItem.OrderItem;
 import com.example.bookstorebackend.person.service.UserService;
-import com.example.bookstorebackend.utils.enums.BookGenre;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,7 +33,7 @@ public class OrderService {
             discount.setMessage(responseMessage);
             return discount;
         }
-        if (bookService.getById(item.getBookId()).getPrice()*item.getQuantity() > 2000 && bookService.getById(item.getBookId()).getGenre() == BookGenre.EDUCATIONAL) {
+        if (bookService.getById(item.getBookId()).getPrice()*item.getQuantity() > 2000 && bookService.getById(item.getBookId()).getGenre().getName().equals("EDUCATIONAL")) {
             double discountAmount = item.getPrice() * item.getQuantity() * 0.07;
             discount.setDiscountAmount(discountAmount);
             String responseMessage = "Applied a discount of 7%("+df.format(discountAmount)+" RSD) for ordering Educational book("+bookService.getById(item.getBookId()).getTitle()+") of value greater than 2000 RSD.";
@@ -124,7 +122,7 @@ public class OrderService {
             for (OrderItem item:order.getOrderItems()) {
                 MyItemDTO myItem = new MyItemDTO();
                 myItem.setId(item.getBook().getId());
-                myItem.setAuthor(item.getBook().getAuthor());
+                myItem.setAuthor(item.getBook().getAuthor().getName());
                 myItem.setGenre(item.getBook().getGenre());
                 myItem.setPublisher(item.getBook().getPublisher());
                 myItem.setPrice(item.getBook().getPrice());
