@@ -2,8 +2,13 @@ package com.example.bookstorebackend.utils;
 
 import com.example.bookstorebackend.person.dto.RegisterDTO;
 import com.example.bookstorebackend.person.model.User;
+import com.example.bookstorebackend.rating.dto.RatingDTO;
+import com.example.bookstorebackend.rating.model.Rating;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.PropertyMap;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ObjectsMapper {
     private static final ModelMapper modelMapper = new ModelMapper();
@@ -27,5 +32,16 @@ public class ObjectsMapper {
 
         modelMapper.addMappings(answerMap);
         return modelMapper.map(registerDTO, User.class);
+    }
+
+    public static List<RatingDTO> convertRatingsToRatingDTO(List<Rating> ratings){
+        List<RatingDTO> ratingsToReturn = new ArrayList<>();
+        for (Rating rating: ratings) {
+            RatingDTO ratingDTO = new RatingDTO();
+            ratingDTO.setRating(rating.getRating());
+            ratingDTO.setBookId(rating.getBook().getId());
+            ratingsToReturn.add(ratingDTO);
+        }
+        return ratingsToReturn;
     }
 }
