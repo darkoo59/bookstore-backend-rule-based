@@ -25,4 +25,9 @@ public class BookController {
     public ResponseEntity<List<Book>> getAll(){
         return new ResponseEntity<>(bookService.getAll(), OK);
     }
+
+    @GetMapping("/characteristics")
+    public ResponseEntity<List<BookCharacteristics>> getAllWithCharacteristics() {
+        return new ResponseEntity<>(bookService.getAllWithCharacteristics(), OK);
+    }
 }

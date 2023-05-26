@@ -4,6 +4,8 @@ import com.example.bookstorebackend.utils.enums.BookGenre;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
+
 @Entity
 @Getter
 @Setter
@@ -23,4 +25,6 @@ public class Book {
     private BookGenre genre;
     private int numberOfPages;
     private double price;
+    private LocalDate dateOfAddingToBookstore;
+    private LocalDate publishDate;
 }
