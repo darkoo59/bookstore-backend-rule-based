@@ -5,8 +5,11 @@ import com.example.bookstorebackend.person.service.UserService;
 import com.example.bookstorebackend.security.filter.AuthUtility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
@@ -30,4 +33,10 @@ public class BookController {
     public ResponseEntity<List<BookCharacteristics>> getAllWithCharacteristics() {
         return new ResponseEntity<>(bookService.getAllWithCharacteristics(), OK);
     }
+    @GetMapping(path="/byId/{id}")
+    @Secured("ROLE_USER")
+    public ResponseEntity<Book> getById(@PathVariable("id") String id){
+        return new ResponseEntity<>(bookService.getById(Integer.valueOf(id)), OK);
+    }
+
 }

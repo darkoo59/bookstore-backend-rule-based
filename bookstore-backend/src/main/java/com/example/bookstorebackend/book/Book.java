@@ -1,10 +1,12 @@
 package com.example.bookstorebackend.book;
 
+import com.example.bookstorebackend.rating.model.Rating;
 import com.example.bookstorebackend.utils.enums.BookGenre;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @Getter
@@ -27,4 +29,8 @@ public class Book {
     private double price;
     private LocalDate dateOfAddingToBookstore;
     private LocalDate publishDate;
+    private double averageRating;
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "book")
+    @JsonIgnore
+    private List<Rating> ratings;
 }

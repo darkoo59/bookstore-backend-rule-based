@@ -37,4 +37,8 @@ public class BookService {
         });
         return bookCharacteristicsList;
     }
+
+    public void save(Book book) {
+        bookRepository.save(book);
+    }
 }
