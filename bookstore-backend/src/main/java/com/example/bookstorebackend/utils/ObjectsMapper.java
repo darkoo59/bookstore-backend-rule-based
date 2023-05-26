@@ -4,8 +4,6 @@ import com.example.bookstorebackend.book.Book;
 import com.example.bookstorebackend.book.dto.BookDTO;
 import com.example.bookstorebackend.genre.Genre;
 import com.example.bookstorebackend.genre.dto.GenreDTO;
-import com.example.bookstorebackend.grade.Grade;
-import com.example.bookstorebackend.grade.dto.GradeDTO;
 import com.example.bookstorebackend.person.dto.AuthorDTO;
 import com.example.bookstorebackend.person.dto.RegisterDTO;
 import com.example.bookstorebackend.person.dto.UserDTO;
@@ -54,7 +52,7 @@ public class ObjectsMapper {
                 map().setTitle(source.getTitle());
                 map().setNumberOfPages(source.getNumberOfPages());
                 map().setPublisher(source.getPublisher());
-                map().setGrades(convertGradesToDTOs(source.getGrades()));
+                map().setRatings(convertRatingsToDTOs(source.getRatings()));
                 map().setGenre(convertGenreToDTO(source.getGenre()));
             }
         };
@@ -97,26 +95,27 @@ public class ObjectsMapper {
         return modelMapper.map(author, AuthorDTO.class);
     }
 
-    public static GradeDTO convertGradeToDTO(Grade grade){
+    public static RatingDTO convertRatingToDTO(Rating rating){
         ModelMapper modelMapper = new ModelMapper();
-        PropertyMap<Grade, GradeDTO> answerMap = new PropertyMap<>() {
+        PropertyMap<Rating, RatingDTO> answerMap = new PropertyMap<>() {
             @Override
             protected void configure() {
                 map().setId(source.getId());
-                map().setValue(source.getValue());
+                map().setRating(source.getRating());
                 map().setUser(convertUserToDTO(source.getUser()));
+                map().setBookId(source.getBook().getId());
             }
         };
         modelMapper.addMappings(answerMap);
-        return modelMapper.map(grade, GradeDTO.class);
+        return modelMapper.map(rating, RatingDTO.class);
     }
 
-    public static List<GradeDTO> convertGradesToDTOs(List<Grade> grades){
-        List<GradeDTO> list = new ArrayList<>();
-        if(grades == null)
+    public static List<RatingDTO> convertRatingsToDTOs(List<Rating> ratings){
+        List<RatingDTO> list = new ArrayList<>();
+        if(ratings == null)
             return list;
-        for(Grade grade: grades)
-            list.add(convertGradeToDTO(grade));
+        for(Rating rating: ratings)
+            list.add(convertRatingToDTO(rating));
         return list;
     }
 

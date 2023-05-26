@@ -1,11 +1,8 @@
 package com.example.bookstorebackend.book;
 
 import com.example.bookstorebackend.genre.Genre;
-import com.example.bookstorebackend.grade.Grade;
 import com.example.bookstorebackend.person.model.Author;
 import com.example.bookstorebackend.rating.model.Rating;
-import com.example.bookstorebackend.utils.enums.BookGenre;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -34,18 +31,16 @@ public class Book {
     @ManyToOne
     @JoinColumn(name = "genre_id")
     private Genre genre;
-    @OneToMany(mappedBy = "book")
-    private List<Grade> grades;
     private int numberOfPages;
     private double price;
-    public int getTotalGrades(){
-        int grades = 0;
-        for(Grade grade: getGrades())
-            grades += grade.getValue();
-        return grades;
-    }
     private double averageRating;
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "book")
-    @JsonIgnore
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "book")
     private List<Rating> ratings;
+
+    public double getTotalRatingNumber(){
+        double ratings = 0;
+        for(Rating rating: getRatings())
+            ratings += rating.getRating();
+        return ratings;
+    }
 }

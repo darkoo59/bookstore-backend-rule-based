@@ -1,12 +1,10 @@
 package com.example.bookstorebackend.book;
 
 import com.example.bookstorebackend.person.model.Author;
-import com.example.bookstorebackend.person.model.User;
 import com.example.bookstorebackend.person.repository.AuthorRepository;
 import lombok.RequiredArgsConstructor;
 import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
-import org.kie.api.runtime.rule.FactHandle;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -34,7 +32,7 @@ public class BookService {
 
     public List<Book> getRecommendedBooks(){
         PriorityQueue<Author> popularAuthors = new PriorityQueue<>(10,
-                Comparator.comparingInt(Author::getTotalGrades));
+                Comparator.comparingDouble(Author::getTotalRatingNumber));
         List<Book> recommendedBooks = new ArrayList<>();
 
         KieSession kieSession = kieContainer.newKieSession();
@@ -50,9 +48,9 @@ public class BookService {
         }
         kieSession.fireAllRules();
         for (Book book : recommendedBooks)
-            System.out.println(book.getTitle() + ": " + book.getTotalGrades());
+            System.out.println(book.getTitle() + ": " + book.getTotalRatingNumber());
         for (Author author : popularAuthors)
-            System.out.println(author.getName() + ": " + author.getTotalGrades());
+            System.out.println(author.getName() + ": " + author.getTotalRatingNumber());
 
         kieSession.dispose();
         return recommendedBooks;

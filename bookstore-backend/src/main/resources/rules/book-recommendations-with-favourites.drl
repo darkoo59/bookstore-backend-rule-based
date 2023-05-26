@@ -2,7 +2,7 @@ package rules;
 
 import com.example.bookstorebackend.book.Book;
 import com.example.bookstorebackend.person.model.Author
-import com.example.bookstorebackend.grade.Grade;
+import com.example.bookstorebackend.rating.model.Rating;
 import java.util.List;
 import java.util.stream.Collectors
 import java.util.Comparator
@@ -38,7 +38,7 @@ when
   $books: List(size > 0) from collect(Book())
 then
     List<Book> sortedBooks = new ArrayList<>($books);
-    sortedBooks.sort((a1, a2) -> a2.getTotalGrades() - a1.getTotalGrades());
+    sortedBooks.sort(Comparator.comparingDouble(a -> ((Book)a).getTotalRatingNumber()).reversed());
     List<Book> top10Books = sortedBooks.subList(0, Math.min(sortedBooks.size(), 10));
     recommendedBooks.addAll(top10Books);
 end

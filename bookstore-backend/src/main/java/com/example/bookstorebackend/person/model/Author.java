@@ -1,8 +1,6 @@
 package com.example.bookstorebackend.person.model;
 
 import com.example.bookstorebackend.book.Book;
-import com.example.bookstorebackend.grade.Grade;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -27,10 +25,10 @@ public class Author {
     public Author(String name){
         this.name = name;
     }
-    public int getTotalGrades(){
-        int grades = 0;
+    public int getTotalRatingNumber(){
+        int ratings = 0;
         for(Book book: getBooks())
-            grades += book.getTotalGrades();
-        return grades;
+            ratings += book.getTotalRatingNumber();
+        return ratings;
     }
 }
