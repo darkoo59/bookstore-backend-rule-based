@@ -1,8 +1,6 @@
 package com.example.bookstorebackend.book;
 
-import com.example.bookstorebackend.person.service.PersonService;
-import com.example.bookstorebackend.person.service.UserService;
-import com.example.bookstorebackend.security.filter.AuthUtility;
+import com.example.bookstorebackend.book.dto.BookDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
@@ -14,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
 
+import static com.example.bookstorebackend.utils.ObjectsMapper.convertBooksToDTOs;
 import static org.springframework.http.HttpStatus.OK;
 
 @Controller
@@ -29,6 +28,11 @@ public class BookController {
         return new ResponseEntity<>(bookService.getAll(), OK);
     }
 
+    @GetMapping(path = "recommended")
+    public ResponseEntity<List<BookDTO>> getRecommended() {
+        List<BookDTO> books = convertBooksToDTOs(bookService.getRecommendedBooks());
+        return new ResponseEntity<>(books, OK);
+    }
     @GetMapping(path="/byId/{id}")
     @Secured("ROLE_USER")
     public ResponseEntity<Book> getById(@PathVariable("id") String id){

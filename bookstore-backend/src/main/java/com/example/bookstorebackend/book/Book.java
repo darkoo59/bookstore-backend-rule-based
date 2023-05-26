@@ -1,8 +1,8 @@
 package com.example.bookstorebackend.book;
 
+import com.example.bookstorebackend.genre.Genre;
+import com.example.bookstorebackend.person.model.Author;
 import com.example.bookstorebackend.rating.model.Rating;
-import com.example.bookstorebackend.utils.enums.BookGenre;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -22,13 +22,25 @@ public class Book {
     )
     private Long id;
     private String title;
-    private String author;
+    @ManyToOne
+    @JoinColumn(name = "author_id")
+    private Author author;
+
     private String publisher;
-    private BookGenre genre;
+
+    @ManyToOne
+    @JoinColumn(name = "genre_id")
+    private Genre genre;
     private int numberOfPages;
     private double price;
     private double averageRating;
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "book")
-    @JsonIgnore
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "book")
     private List<Rating> ratings;
+
+    public double getTotalRatingNumber(){
+        double ratings = 0;
+        for(Rating rating: getRatings())
+            ratings += rating.getRating();
+        return ratings;
+    }
 }
