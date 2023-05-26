@@ -24,4 +24,8 @@ public class BookService {
         kiesession.dispose();
         return book.getPrice();
     }
+
+    public void save(Book book) {
+        bookRepository.save(book);
+    }
 }
