@@ -28,6 +28,11 @@ public class BookController {
         return new ResponseEntity<>(bookService.getAll(), OK);
     }
 
+    @GetMapping("/characteristics")
+    public ResponseEntity<List<BookCharacteristics>> getAllWithCharacteristics() {
+        return new ResponseEntity<>(bookService.getAllWithCharacteristics(), OK);
+    }
+
     @GetMapping(path = "recommended")
     public ResponseEntity<List<BookDTO>> getRecommended() {
         List<BookDTO> books = convertBooksToDTOs(bookService.getRecommendedBooks());

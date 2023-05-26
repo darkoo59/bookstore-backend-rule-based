@@ -15,6 +15,7 @@ import java.util.PriorityQueue;
 @Configuration
 public class DroolsConfig {
     private static final String baseDrlFile = "rules/rules.drl";
+    private static final String nonauthBooksDrlFile = "rules/booksNonauthenticated/nonauth_books.drl";
 
     @Bean
     public KieContainer kieContainer() {
@@ -22,6 +23,7 @@ public class DroolsConfig {
 
         KieFileSystem kieFileSystem = kieServices.newKieFileSystem();
         kieFileSystem.write(ResourceFactory.newClassPathResource(baseDrlFile));
+        kieFileSystem.write(ResourceFactory.newClassPathResource(nonauthBooksDrlFile));
         kieFileSystem.write(ResourceFactory.newClassPathResource("rules/book-recommendations-with-favourites.drl"));
         KieBuilder kieBuilder = kieServices.newKieBuilder(kieFileSystem);
         kieBuilder.buildAll();

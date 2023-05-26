@@ -58,6 +58,7 @@ public class SecurityConfig {
                 "/bookstore/user/register",
                 "/bookstore/user/logout",
                 "/bookstore/book",
+                "/bookstore/book/characteristics",
                 "/bookstore/book/recommended"
         ).permitAll();
         http.authorizeRequests().anyRequest().authenticated();

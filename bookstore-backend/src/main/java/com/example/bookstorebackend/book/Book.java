@@ -5,7 +5,7 @@ import com.example.bookstorebackend.person.model.Author;
 import com.example.bookstorebackend.rating.model.Rating;
 import jakarta.persistence.*;
 import lombok.*;
-
+import java.time.LocalDate;
 import java.util.List;
 
 @Entity
@@ -33,6 +33,8 @@ public class Book {
     private Genre genre;
     private int numberOfPages;
     private double price;
+    private LocalDate dateOfAddingToBookstore;
+    private LocalDate publishDate;
     private double averageRating;
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "book")
     private List<Rating> ratings;
