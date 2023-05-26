@@ -11,6 +11,8 @@ import com.example.bookstorebackend.person.dto.RegisterDTO;
 import com.example.bookstorebackend.person.dto.UserDTO;
 import com.example.bookstorebackend.person.model.Author;
 import com.example.bookstorebackend.person.model.User;
+import com.example.bookstorebackend.rating.dto.RatingDTO;
+import com.example.bookstorebackend.rating.model.Rating;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.PropertyMap;
 
@@ -130,5 +132,16 @@ public class ObjectsMapper {
         };
         modelMapper.addMappings(answerMap);
         return modelMapper.map(user, UserDTO.class);
+    }
+    
+    public static List<RatingDTO> convertRatingsToRatingDTO(List<Rating> ratings){
+        List<RatingDTO> ratingsToReturn = new ArrayList<>();
+        for (Rating rating: ratings) {
+            RatingDTO ratingDTO = new RatingDTO();
+            ratingDTO.setRating(rating.getRating());
+            ratingDTO.setBookId(rating.getBook().getId());
+            ratingsToReturn.add(ratingDTO);
+        }
+        return ratingsToReturn;
     }
 }

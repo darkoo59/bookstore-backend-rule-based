@@ -57,4 +57,8 @@ public class BookService {
         kieSession.dispose();
         return recommendedBooks;
     }
+    
+    public void save(Book book) {
+        bookRepository.save(book);
+    }
 }

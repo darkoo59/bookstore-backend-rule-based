@@ -3,6 +3,9 @@ package com.example.bookstorebackend.book;
 import com.example.bookstorebackend.genre.Genre;
 import com.example.bookstorebackend.grade.Grade;
 import com.example.bookstorebackend.person.model.Author;
+import com.example.bookstorebackend.rating.model.Rating;
+import com.example.bookstorebackend.utils.enums.BookGenre;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -41,4 +44,8 @@ public class Book {
             grades += grade.getValue();
         return grades;
     }
+    private double averageRating;
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "book")
+    @JsonIgnore
+    private List<Rating> ratings;
 }
