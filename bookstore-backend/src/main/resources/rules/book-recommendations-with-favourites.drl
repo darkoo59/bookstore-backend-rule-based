@@ -1,0 +1,44 @@
+package rules;
+
+import com.example.bookstorebackend.book.Book;
+import com.example.bookstorebackend.person.model.Author
+import com.example.bookstorebackend.rating.model.Rating;
+import java.util.List;
+import java.util.stream.Collectors
+import java.util.Comparator
+import java.util.ArrayList
+import java.util.Collections;
+
+global java.util.PriorityQueue popularAuthors;
+global java.util.ArrayList recommendedBooks;
+
+rule "Identify Most Popular Authors"
+salience 20
+when
+  $author: Author()
+then
+  popularAuthors.add($author);
+  if (popularAuthors.size() > 4) {
+      popularAuthors.poll();
+  }
+end
+
+rule "Collect All Books"
+salience 15
+when
+  $author: Author()
+  $book: Book(author == $author)
+then
+  insert($book);
+end
+
+rule "Sort and Select Top 10 Books"
+salience 10
+when
+  $books: List(size > 0) from collect(Book())
+then
+    List<Book> sortedBooks = new ArrayList<>($books);
+    sortedBooks.sort(Comparator.comparingDouble(a -> ((Book)a).getTotalRatingNumber()).reversed());
+    List<Book> top10Books = sortedBooks.subList(0, Math.min(sortedBooks.size(), 10));
+    recommendedBooks.addAll(top10Books);
+end
