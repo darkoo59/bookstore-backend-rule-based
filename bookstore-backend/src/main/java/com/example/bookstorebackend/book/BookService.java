@@ -1,17 +1,18 @@
 package com.example.bookstorebackend.book;
 
+import com.example.bookstorebackend.genre.Genre;
+import com.example.bookstorebackend.genre.GenreRepository;
 import com.example.bookstorebackend.person.model.Author;
+import com.example.bookstorebackend.person.model.User;
 import com.example.bookstorebackend.person.repository.AuthorRepository;
+import com.example.bookstorebackend.person.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.PriorityQueue;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -19,6 +20,8 @@ public class BookService {
     private final BookRepository bookRepository;
     private final AuthorRepository authorRepository;
     private final KieContainer kieContainer;
+    private final GenreRepository genreRepository;
+    private final UserRepository userRepository;
 
     public List<Book> getAll() { return this.bookRepository.findAll(); }
     public Book getById(long id) { return this.bookRepository.findById(id).get();}
@@ -42,27 +45,29 @@ public class BookService {
         return bookCharacteristicsList;
     }
 
-    public List<Book> getRecommendedBooks(){
-        PriorityQueue<Author> popularAuthors = new PriorityQueue<>(10,
-                Comparator.comparingDouble(Author::getTotalRatingNumber));
-        List<Book> recommendedBooks = new ArrayList<>();
+    public List<Book> getRecommendedBooks(String email) throws Exception {
+        Optional<User> user = userRepository.findByEmail(email);
+        if(user.isEmpty())
+            throw new Exception("No user found");
 
+        List<Genre> genres = user.get().getFavouriteGenres();
+        List<Book> recommendedBooks = new ArrayList<>();
         KieSession kieSession = kieContainer.newKieSession();
-        kieSession.setGlobal("popularAuthors", popularAuthors);
         kieSession.setGlobal("recommendedBooks", recommendedBooks);
         List<Author> authors = authorRepository.findAll();
-        for (Author author : authors) {
+        for (Author author : authors)
             kieSession.insert(author);
-        }
-        List<Book> books = bookRepository.findAll();
-        for(Book book : books){
-            kieSession.insert(book);
-        }
+        for ( Genre genre: genres)
+            kieSession.insert(genre);
         kieSession.fireAllRules();
-        for (Book book : recommendedBooks)
+
+        for (Book book : recommendedBooks){
+            System.out.println("##");
             System.out.println(book.getTitle() + ": " + book.getTotalRatingNumber());
-        for (Author author : popularAuthors)
-            System.out.println(author.getName() + ": " + author.getTotalRatingNumber());
+            System.out.println("Author: " + book.getAuthor().getName());
+            System.out.println("##");
+        }
+        System.out.println("*************");
 
         kieSession.dispose();
         return recommendedBooks;

@@ -7,7 +7,7 @@ rule "Book test"
     when
         $b: Book(price > 1000)
     then
-        System.out.println($b.getPublisher());
+        //System.out.println($b.getPublisher());
 end;
 
 rule "Book is new if it's added to bookstore in last 1 month"
@@ -26,7 +26,7 @@ rule "Book is new if it's published to bookstore in last 6 month"
     when
         $bc: BookCharacteristics(book.publishDate > LocalDate.now().minusMonths(6))
     then
-        System.out.println("Rule [Book is new if it's published to bookstore in last 6 month] - fired");
+        //System.out.println("Rule [Book is new if it's published to bookstore in last 6 month] - fired");
         modify($bc){ setNew(true) }
 end;
 
@@ -36,6 +36,6 @@ rule "Suggest book if it's new"
     when
         $bc: BookCharacteristics(isNew() == true)
     then
-        System.out.println("Rule [Suggest book if it's new] - fired");
+        //System.out.println("Rule [Suggest book if it's new] - fired");
         modify($bc) { setSuggested(true) }
 end;
