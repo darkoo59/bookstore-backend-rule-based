@@ -2,16 +2,13 @@ package rules.booksNonauthenticated;
 
 import com.example.bookstorebackend.book.*;
 import java.time.LocalDate;
+import java.util.List;
+import java.util.random.RandomGenerator;
 
-rule "Book test"
-    when
-        $b: Book(price > 1000)
-    then
-        System.out.println($b.getPublisher());
-end;
+global RandomGenerator randomGenerator;
 
 rule "Book is new if it's added to bookstore in last 1 month"
-    activation-group "book characteristics"
+    activation-group "book - new"
     no-loop true
     when
         $bc: BookCharacteristics(book.dateOfAddingToBookstore > LocalDate.now().minusMonths(1))
@@ -21,7 +18,7 @@ rule "Book is new if it's added to bookstore in last 1 month"
 end;
 
 rule "Book is new if it's published to bookstore in last 6 month"
-    activation-group "book characteristics"
+    activation-group "book - new"
     no-loop true
     when
         $bc: BookCharacteristics(book.publishDate > LocalDate.now().minusMonths(6))
@@ -30,12 +27,92 @@ rule "Book is new if it's published to bookstore in last 6 month"
         modify($bc){ setNew(true) }
 end;
 
-rule "Suggest book if it's new"
-    activation-group "suggestions"
+rule "Book is good rated if it has avg rating >= 4"
+    when
+        $bc: BookCharacteristics(book.averageRating >= 4)
+    then
+        modify($bc) { setGoodRated(true) }
+        modify($bc) { setBadRated(false) }
+end;
+
+rule "Book is bad rated if it has avg rating <= 2.5"
+    when
+        $bc: BookCharacteristics(book.averageRating <= 2.5 && book.averageRating > 0)
+    then
+        modify($bc) { setGoodRated(false) }
+        modify($bc) { setBadRated(true) }
+end;
+
+rule "Book is popular if it has 20 or more ratings"
+    activation-group "book - popularity"
+    when
+        $bc: BookCharacteristics(book.getRatings().size() >= 20)
+    then
+        modify($bc) { setPopular(true) }
+end;
+
+rule "Book is popular if it is new and has 10 or more ratings"
+    activation-group "book - popularity"
     salience -1
     when
-        $bc: BookCharacteristics(isNew() == true)
+        $bc: BookCharacteristics(book.getRatings().size() >= 10 && isNew())
+    then
+        modify($bc) { setPopular(true) }
+end;
+
+
+
+rule "Suggest book if it's new"
+    activation-group "suggestions"
+    salience -2
+    when
+        $bc: BookCharacteristics(isNew())
     then
         System.out.println("Rule [Suggest book if it's new] - fired");
         modify($bc) { setSuggested(true) }
+end;
+
+rule "Suggest book if it's popular and is rated good or neutral"
+    activation-group "suggestions"
+    salience -2
+    when
+        $bc: BookCharacteristics(isPopular() && (isGoodRated() || (!isGoodRated() && !isBadRated())))
+    then
+        System.out.println("Rule [Suggest book if it's popular and is rated good or neutral] - fired");
+        modify($bc) { setSuggested(true) }
+end;
+
+rule "If suggestion list is larger then 10 remove bad rated books"
+    agenda-group "remove books"
+    no-loop true
+    when
+        $bookCharacteristicList: List(size > 10) from collect(BookCharacteristics());
+    then
+        System.out.println("Rule [If suggestion list is larger then 10 remove bad rated books] - fired");
+        $bookCharacteristicList.forEach(x -> {
+            BookCharacteristics bc = (BookCharacteristics)x;
+            if (bc.isBadRated()) {
+                bc.setSuggested(false);
+            }
+        });
+end;
+
+rule "If suggestion list is larger then 10 after removing bad rated take 10 books randomly"
+    agenda-group "remove books"
+    no-loop true
+    salience -1
+    when
+        $bookCharacteristicList: List(size > 10) from collect(BookCharacteristics());
+    then
+        System.out.println("Rule [If suggestion list is larger then 10 after removing bad rated take 10 books randomly] - fired");
+        int suggestedCounter = 0;
+        for(Object o: $bookCharacteristicList){
+            if (((BookCharacteristics)o).isSuggested()) {
+                if (suggestedCounter < 10) {
+                    suggestedCounter++;
+                } else {
+                    ((BookCharacteristics)o).setSuggested(false);
+                }
+            }
+        }
 end;

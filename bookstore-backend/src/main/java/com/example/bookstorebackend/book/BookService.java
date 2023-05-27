@@ -33,11 +33,13 @@ public class BookService {
             kieSession.insert(bookCharacteristics);
             kieSession.fireAllRules();
         });
+        kieSession.getAgenda().getAgendaGroup("remove books").setFocus();
+        kieSession.fireAllRules();
         kieSession.dispose();
         bookCharacteristicsList.sort((b1, b2) -> {
-            if (b1.isSuggested()) return -1;
-            if (b2.isSuggested()) return  1;
-            return 0;
+              if (b1.getBook().getAverageRating() - b2.getBook().getAverageRating() > 0) return -1;
+              if (b1.getBook().getAverageRating() - b2.getBook().getAverageRating() < 0) return 1;
+              return 0;
         });
         return bookCharacteristicsList;
     }
