@@ -5,6 +5,7 @@ import com.example.bookstorebackend.order.dto.DiscountResponseDTO;
 import com.example.bookstorebackend.order.dto.MyOrdersDTO;
 import com.example.bookstorebackend.order.dto.OrderDTO;
 import com.example.bookstorebackend.security.filter.AuthUtility;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
@@ -23,21 +24,19 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.OK;
 
 @Controller
+@RequiredArgsConstructor
 @RequestMapping("/bookstore/order")
 public class OrderController {
     private final OrderService orderService;
-    @Autowired
-    public OrderController(OrderService orderService) {
-        this.orderService = orderService;
-    }
 
     @PostMapping("/discount")
     @Secured("ROLE_USER")
     public ResponseEntity<?> GetPriceWithDiscount(@RequestBody OrderDTO order) {
         try {
-            DiscountResponseDTO response = orderService.calculateTotalPrice(order);
-            return new ResponseEntity<>(response,OK);
+            DiscountResponseDTO response = orderService.getPriceWithDiscount(order);
+            return new ResponseEntity<>(response, OK);
         } catch (Exception e) {
+            System.out.println(e.getMessage());
             return new ResponseEntity<>("Unknown error", BAD_REQUEST);
         }
     }

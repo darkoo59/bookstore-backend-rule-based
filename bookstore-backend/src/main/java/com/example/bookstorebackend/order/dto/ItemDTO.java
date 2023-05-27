@@ -9,7 +9,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ItemDTO {
-    public Long bookId;
+    public Book book;
     public int quantity;
     public double price;
+    public int discount;
 }

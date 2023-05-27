@@ -7,6 +7,9 @@ import com.example.bookstorebackend.order.model.Order;
 import com.example.bookstorebackend.orderItem.OrderItem;
 import com.example.bookstorebackend.person.service.UserService;
 import com.example.bookstorebackend.utils.enums.BookGenre;
+import lombok.RequiredArgsConstructor;
+import org.kie.api.runtime.KieContainer;
+import org.kie.api.runtime.KieSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,88 +17,21 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+@RequiredArgsConstructor
 @Service
 public class OrderService {
     private final BookService bookService;
     private final OrderRepository orderRepository;
     private final UserService userService;
+    private final KieContainer kieContainer;
     private static final DecimalFormat df = new DecimalFormat("0.00");
-    @Autowired
-    public OrderService(BookService bookService, OrderRepository orderRepository, UserService userService) {
-        this.bookService = bookService;
-        this.orderRepository = orderRepository;
-        this.userService = userService;
-    }
-    public Discount calculateItemDiscount(ItemDTO item) {
-        Discount discount = new Discount(0.0,"");
-        if (item.getQuantity() >= 2) {
-            double discountAmount = item.getPrice() * item.getQuantity() * 0.1;
-            discount.setDiscountAmount(discountAmount);
-            String responseMessage = "Applied a discount of 10%("+df.format(discountAmount)+" RSD) for ordering 2 or more items of "+bookService.getById(item.getBookId()).getTitle()+".";
-            discount.setMessage(responseMessage);
-            return discount;
-        }
-        if (bookService.getById(item.getBookId()).getPrice()*item.getQuantity() > 2000 && bookService.getById(item.getBookId()).getGenre() == BookGenre.EDUCATIONAL) {
-            double discountAmount = item.getPrice() * item.getQuantity() * 0.07;
-            discount.setDiscountAmount(discountAmount);
-            String responseMessage = "Applied a discount of 7%("+df.format(discountAmount)+" RSD) for ordering Educational book("+bookService.getById(item.getBookId()).getTitle()+") of value greater than 2000 RSD.";
-            discount.setMessage(responseMessage);
-            return discount;
-        }
-        if (bookService.getById(item.getBookId()).getPrice()*item.getQuantity() > 3000) {
-            double discountAmount = item.getPrice() * item.getQuantity() * 0.05;
-            discount.setDiscountAmount(discountAmount);
-            String responseMessage = "Applied a discount of 5%("+df.format(discountAmount)+" RSD) for ordering "+bookService.getById(item.getBookId()).getTitle()+" which value is greater than 3000 RSD.";
-            discount.setMessage(responseMessage);
-            return discount;
-        }
-        return discount;
-    }
 
-    public Discount calculateOrderDiscount(OrderDTO order) {
-        int itemCount = order.getItems().size();
-        Discount discount = new Discount(0.0,"");
-        if (itemCount >= 5) {
-            double discountAmount = order.getItems().stream()
-                    .mapToDouble(ItemDTO::getPrice)
-                    .sum() * 0.15;
-            String responseMessage = "Applied a discount of 15%("+df.format(discountAmount)+" RSD) for ordering more than 5 items.";
-            discount.setDiscountAmount(discountAmount);
-            discount.setMessage(responseMessage);
-            return discount;
-        }
-        if (itemCount >= 3) {
-            double discountAmount = order.getItems().stream()
-                    .mapToDouble(ItemDTO::getPrice)
-                    .sum() * 0.1;
-            String responseMessage = "Applied a discount of 10%("+df.format(discountAmount)+" RSD) for ordering more than 3 items.";
-            discount.setDiscountAmount(discountAmount);
-            discount.setMessage(responseMessage);
-            return discount;
-        }
-
-        return discount;
-    }
-
-    public DiscountResponseDTO calculateTotalPrice(OrderDTO order) {
-        /*double totalPriceWithItemDiscount = order.getItems().stream()
-                .mapToDouble(item -> item.getPrice()
-                         * item.getQuantity() - calculateItemDiscount(item).getDiscountAmount())
-                .sum();*/
-        DiscountResponseDTO itemDiscount = new DiscountResponseDTO(0.0,new ArrayList<>());
-        for (ItemDTO item:order.getItems()) {
-            Discount discount = calculateItemDiscount(item);
-            itemDiscount.finalPrice += item.getPrice() * item.getQuantity() - discount.getDiscountAmount();
-            itemDiscount.message.add(discount.getMessage());
-        }
-        Discount discount = calculateOrderDiscount(order);
-        DiscountResponseDTO orderDiscount = new DiscountResponseDTO(0.0,new ArrayList<>());
-        orderDiscount.setFinalPrice(order.getTotalPrice() - discount.getDiscountAmount());
-        orderDiscount.message.add(discount.getMessage());
-        if (itemDiscount.getFinalPrice() < orderDiscount.getFinalPrice()) {
-            return itemDiscount;
-        }
-        return orderDiscount;
+    public DiscountResponseDTO getPriceWithDiscount(OrderDTO order) {
+        KieSession kieSession = kieContainer.newKieSession();
+        kieSession.insert(order);
+        kieSession.fireAllRules();
+        kieSession.dispose();
+        return new DiscountResponseDTO(order.totalPrice, order.discountReason);
     }
 
     public void makeDeliveryPaymentOrder(OrderDTO orderDTO, String userEmail) {
@@ -105,7 +41,7 @@ public class OrderService {
         List<OrderItem> itemsToAdd = new ArrayList<OrderItem>();
         for (ItemDTO item:orderDTO.getItems()) {
             OrderItem orderItem = new OrderItem();
-            orderItem.setBook(bookService.getById(item.getBookId()));
+            orderItem.setBook(bookService.getById(item.getBook().getId()));
             orderItem.setOrder(order);
             orderItem.setQuantity(item.getQuantity());
             itemsToAdd.add(orderItem);

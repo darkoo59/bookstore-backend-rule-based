@@ -17,11 +17,10 @@ public class BookService {
     public List<Book> getAll() { return this.bookRepository.findAll(); }
     public Book getById(long id) { return this.bookRepository.findById(id).get();}
 
-    public double validateBookPrice(Book book) {
+    public void validateBookPrice(Book book) {
         KieSession kiesession = kieContainer.newKieSession();
         kiesession.insert(book);
         kiesession.fireAllRules();
         kiesession.dispose();
-        return book.getPrice();
     }
 }

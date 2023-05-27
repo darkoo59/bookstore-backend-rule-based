@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class DroolsConfig {
     private static final String baseDrlFile = "rules/rules.drl";
+    private static final String orderDiscountDrlFile = "rules/order-discount.drl";
 
     @Bean
     public KieContainer kieContainer() {
@@ -19,6 +20,8 @@ public class DroolsConfig {
 
         KieFileSystem kieFileSystem = kieServices.newKieFileSystem();
         kieFileSystem.write(ResourceFactory.newClassPathResource(baseDrlFile));
+        kieFileSystem.write(ResourceFactory.newClassPathResource(orderDiscountDrlFile));
+
         KieBuilder kieBuilder = kieServices.newKieBuilder(kieFileSystem);
         kieBuilder.buildAll();
         KieModule kieModule = kieBuilder.getKieModule();

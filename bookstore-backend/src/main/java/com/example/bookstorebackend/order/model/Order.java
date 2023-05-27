@@ -11,7 +11,6 @@ import java.util.List;
 @Entity(name = "order_")
 @Getter
 @Setter
-@ToString
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 @NoArgsConstructor
 @AllArgsConstructor
@@ -30,4 +29,6 @@ public class Order {
     private List<OrderItem> orderItems;
 
     private Double price;
+
+    private int discount;
 }
