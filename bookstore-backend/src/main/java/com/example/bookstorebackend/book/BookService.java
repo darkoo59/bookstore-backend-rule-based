@@ -1,7 +1,6 @@
 package com.example.bookstorebackend.book;
 
 import com.example.bookstorebackend.genre.Genre;
-import com.example.bookstorebackend.genre.GenreRepository;
 import com.example.bookstorebackend.person.model.Author;
 import com.example.bookstorebackend.person.model.User;
 import com.example.bookstorebackend.person.repository.AuthorRepository;
@@ -10,7 +9,10 @@ import lombok.RequiredArgsConstructor;
 import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
 import org.springframework.stereotype.Service;
-import java.util.*;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -18,7 +20,6 @@ public class BookService {
     private final BookRepository bookRepository;
     private final AuthorRepository authorRepository;
     private final KieContainer kieContainer;
-    private final GenreRepository genreRepository;
     private final UserRepository userRepository;
 
     public List<Book> getAll() { return this.bookRepository.findAll(); }
@@ -56,8 +57,10 @@ public class BookService {
         Optional<User> user = userRepository.findByEmail(email);
         if(user.isEmpty())
             throw new Exception("No user found");
-
         List<Genre> genres = user.get().getFavouriteGenres();
+        if(genres.isEmpty())
+            return new ArrayList<>();
+
         List<Book> recommendedBooks = new ArrayList<>();
         KieSession kieSession = kieContainer.newKieSession();
         kieSession.setGlobal("recommendedBooks", recommendedBooks);

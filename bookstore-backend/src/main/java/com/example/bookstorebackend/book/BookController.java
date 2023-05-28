@@ -37,15 +37,13 @@ public class BookController {
 
     @GetMapping(path = "recommended")
     public ResponseEntity<List<BookDTO>> getRecommended(HttpServletRequest request) {
-//        String email = AuthUtility.getEmailFromRequest(request);
-        String email = "darkoo59@gmail.com";
+        String email = AuthUtility.getEmailFromRequest(request);
         try{
             List<BookDTO> books = convertBooksToDTOs(bookService.getRecommendedBooks(email));
             return new ResponseEntity<>(books, OK);
         }catch (Exception e){
             return new ResponseEntity<>(BAD_REQUEST);
         }
-
     }
     @GetMapping(path="/byId/{id}")
     @Secured("ROLE_USER")

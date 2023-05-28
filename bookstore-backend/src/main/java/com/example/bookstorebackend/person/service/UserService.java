@@ -2,13 +2,11 @@ package com.example.bookstorebackend.person.service;
 
 import com.example.bookstorebackend.ConfirmationToken.ConfirmationToken;
 import com.example.bookstorebackend.ConfirmationToken.ConfirmationTokenService;
-import com.example.bookstorebackend.address.Address;
-import com.example.bookstorebackend.address.AddressRepository;
 import com.example.bookstorebackend.address.AddressService;
 import com.example.bookstorebackend.exceptions.EmailExistsException;
-import com.example.bookstorebackend.exceptions.MessagingException;
+import com.example.bookstorebackend.genre.Genre;
+import com.example.bookstorebackend.genre.GenreRepository;
 import com.example.bookstorebackend.person.dto.RegisterDTO;
-import com.example.bookstorebackend.person.model.Person;
 import com.example.bookstorebackend.person.model.User;
 import com.example.bookstorebackend.person.repository.UserRepository;
 import com.example.bookstorebackend.role.Role;
@@ -20,7 +18,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -31,6 +30,7 @@ public class UserService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final ConfirmationTokenService confirmationTokenService;
+    private final GenreRepository genreRepository;
     private final AddressService addressService;
     public User getUser(String email) {
         return userRepository.findByEmail(email).isPresent() ?
@@ -69,5 +69,14 @@ public class UserService {
                 user
         );
         confirmationTokenService.saveConfirmationToken(confirmationToken);
+    }
+
+    public void updateGenres(String email, List<Long> genreIds) throws Exception {
+        Optional<User> user = userRepository.findByEmail(email);
+        if(user.isEmpty())
+            throw new Exception("No user found");
+        List<Genre> genres = genreRepository.findAllById(genreIds);
+        user.get().setFavouriteGenres(genres);
+        userRepository.save(user.get());
     }
 }
