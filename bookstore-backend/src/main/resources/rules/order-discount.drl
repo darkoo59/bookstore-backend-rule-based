@@ -1,0 +1,107 @@
+package rules;
+
+import com.example.bookstorebackend.order.dto.ItemDTO
+import com.example.bookstorebackend.order.dto.OrderDTO
+import java.util.Iterator
+import java.util.regex.Pattern
+import java.util.regex.Matcher
+import java.util.List
+import java.util.ArrayList
+import java.util.Set
+import java.util.HashSet;
+
+rule "2 or more items - 10% discount"
+salience 4
+when
+    $order: OrderDTO($items: items)
+    $item: ItemDTO(quantity >= 2) from $items
+then
+    $item.discount = 10;
+    $order.discountReason.add("Applied a discount of 10% on \"" + $item.book.getTitle()
+                            + "\" for ordering more than 1");
+end;
+
+rule "Item price over 3000 - 5% discount"
+salience 2
+when
+    $order: OrderDTO($items: items)
+    $item: ItemDTO(price > 3000) from $items
+then
+    $item.discount = 5;
+    $order.discountReason.add("Applied a discount of 5% on \"" + $item.book.getTitle()
+                            + "\" for it's price being more than 3000");
+end;
+
+rule "Item price over 2000 and educational genre - 7% discount"
+salience 3
+when
+    $order: OrderDTO($items: items)
+    $item: ItemDTO(price > 2000, book.getGenre().getName().equals("EDUCATIONAL")) from $items
+then
+    $item.discount = 7;
+    $order.discountReason.add("Applied a discount of 7% on \"" + $item.book.getTitle()
+                            + "\" because the genre is educational and its price is above 2000");
+end;
+
+rule "Order has 3 or more order items - 10% discount"
+salience 10
+when
+    $order: OrderDTO(items.size() >= 3)
+then
+    $order.discount = 10;
+    $order.discountReason.add("Applied a discount of 10% for ordering " + $order.items.size() + " books.");
+end;
+
+rule "Order has 5 or more order items - 15% discount"
+salience 11
+when
+    $order: OrderDTO(items.size() >= 5)
+then
+    $order.discount = 15;
+    $order.discountReason.add("Applied a discount of 15% for ordering " + $order.items.size() + " books.");
+end;
+
+rule "Choose lowest order cost"
+salience 0
+when
+    $order: OrderDTO($items: items)
+    $item: ItemDTO() from $items
+    Number(priceWithOrderDiscount : doubleValue)
+        from ($order.totalPrice - $order.totalPrice * $order.discount / 100)
+    Number(priceWithItemsDiscount : doubleValue)
+        from accumulate($i: ItemDTO ($p: price, $d: discount, $q: quantity)
+            from $items, sum(($p - ($p * $d) / 100) * $q))
+then
+    if (priceWithItemsDiscount > priceWithOrderDiscount) {
+        $order.totalPrice = priceWithOrderDiscount;
+        $order.discountReason.removeIf(item1 -> !item1.contains("books."));
+        if ($order.discountReason.size() > 1) {
+            $order.discountReason.removeIf(item2 -> item2.contains("10%"));
+        }
+    } else {
+        $order.totalPrice = priceWithItemsDiscount;
+        $order.discountReason.removeIf(item3 -> item3.contains("books."));
+
+        List<String> stringsToDelete = new ArrayList<>();
+        Pattern pattern = Pattern.compile("\"([^\"]*)\"");
+        Set<String> matchedWords = new HashSet<>();
+
+        for (String reason : $order.discountReason) {
+            Matcher matcher = pattern.matcher(reason);
+            while (matcher.find()) {
+                String word = matcher.group(1);
+                if (matchedWords.contains(word)) {
+                    stringsToDelete.add(reason);
+                } else {
+                    matchedWords.add(word);
+                }
+            }
+        }
+
+        $order.discountReason.removeAll(stringsToDelete);
+    }
+end
+
+
+
+

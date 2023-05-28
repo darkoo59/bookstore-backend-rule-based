@@ -10,6 +10,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DiscountResponseDTO {
-    public double finalPrice;
-    public List<String> message;
+    public double price;
+    public List<String> discountReason;
 }

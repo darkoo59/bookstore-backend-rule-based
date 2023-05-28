@@ -10,8 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDate;
 import java.util.*;
 
 @Service
@@ -24,7 +22,14 @@ public class BookService {
     private final UserRepository userRepository;
 
     public List<Book> getAll() { return this.bookRepository.findAll(); }
-    public Book getById(long id) { return this.bookRepository.findById(id).get();}
+    public Book getById(long id) { return this.bookRepository.findById(id).get(); }
+
+    public void validateBookPrice(Book book) {
+        KieSession kiesession = kieContainer.newKieSession();
+        kiesession.insert(book);
+        kiesession.fireAllRules();
+        kiesession.dispose();
+    }
 
     public List<BookCharacteristics> getAllWithCharacteristics() {
         KieSession kieSession = kieContainer.newKieSession();

@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -12,4 +13,6 @@ import java.util.List;
 public class OrderDTO {
     public List<ItemDTO> items;
     public double totalPrice;
+    public int discount;
+    public List<String> discountReason = new ArrayList<>();
 }
