@@ -66,14 +66,24 @@ INSERT INTO address (id,city,country,number,street) VALUES
     (1, 'Novi Sad', 'Serbia', '14', 'Bulevar Despota Stefana');
 
 INSERT INTO user_ (id,email,firstname,gender,information,lastname,national_id,occupation,password,phone,address_id) VALUES
-    (1, 'darkoo59@gmail.com', 'Darko', 0, 'No more info', 'Selakovic', '1234567891011', 'Student', '$2a$10$RWsW7.CSl1WqfG5tFvYcW.N5vhb0HRBxCw72/xKChZmSLI6CmlA7C', '06123454654', 1);
-
+    (1, 'darkoo59@gmail.com', 'Darko', 0, 'No more info', 'Selakovic', '1234567891011', 'Student', '$2a$10$RWsW7.CSl1WqfG5tFvYcW.N5vhb0HRBxCw72/xKChZmSLI6CmlA7C', '06123454654', 1),
+    (2, 'email1@gmail.com', 'Firstname1', 0, 'No more info', 'Lastname1', '1234567891011', 'Student', '$2a$10$RWsW7.CSl1WqfG5tFvYcW.N5vhb0HRBxCw72/xKChZmSLI6CmlA7C', '06123454654', 1),
+    (3, 'email2@gmail.com', 'Firstname2', 0, 'No more info', 'Lastname2', '1234567891011', 'Student', '$2a$10$RWsW7.CSl1WqfG5tFvYcW.N5vhb0HRBxCw72/xKChZmSLI6CmlA7C', '06123454654', 1),
+    (4, 'email3@gmail.com', 'Firstname3', 0, 'No more info', 'Lastname3', '1234567891011', 'Student', '$2a$10$RWsW7.CSl1WqfG5tFvYcW.N5vhb0HRBxCw72/xKChZmSLI6CmlA7C', '06123454654', 1),
+    (5, 'email4@gmail.com', 'Firstname4', 0, 'No more info', 'Lastname4', '1234567891011', 'Student', '$2a$10$RWsW7.CSl1WqfG5tFvYcW.N5vhb0HRBxCw72/xKChZmSLI6CmlA7C', '06123454654', 1),
+    (6, 'email5@gmail.com', 'Firstname5', 0, 'No more info', 'Lastname5', '1234567891011', 'Student', '$2a$10$RWsW7.CSl1WqfG5tFvYcW.N5vhb0HRBxCw72/xKChZmSLI6CmlA7C', '06123454654', 1),
+    (7, 'email6@gmail.com', 'Firstname6', 0, 'No more info', 'Lastname6', '1234567891011', 'Student', '$2a$10$RWsW7.CSl1WqfG5tFvYcW.N5vhb0HRBxCw72/xKChZmSLI6CmlA7C', '06123454654', 1);
 INSERT INTO role (id,name) VALUES
     (1, 'USER');
 
 INSERT INTO person_roles(person_id, roles_id) VALUES
-    (1, 1);
-
+    (1, 1),
+    (2, 1),
+    (3, 1),
+    (4, 1),
+    (5, 1),
+    (6, 1),
+    (7, 1);
 INSERT INTO user__favourite_genres(user__id, favourite_genres_id) VALUES
     (1, 3),
     (1, 7);
@@ -83,23 +93,23 @@ INSERT INTO rating(id, user_id, book_id, rating) VALUES
     (2, 1, 29, 4.0),
     (3, 1, 28, 3.0),
     (4, 1, 27, 2.0),
-    (5, 1, 26, 3.0),
-    (6, 1, 25, 2.0),
-    (7, 1, 24, 4.0),
-    (8, 1, 23, 4.0),
-    (9, 1, 22, 4.0),
+    (5, 2, 26, 3.0),
+    (6, 3, 25, 2.0),
+    (7, 4, 24, 4.0),
+    (8, 5, 23, 4.0),
+    (9, 6, 22, 4.0),
     (10, 1, 21, 5.0),
     (11, 1, 15, 4.0),
-    (12, 1, 15, 1.0),
-    (13, 1, 15, 4.0),
-    (14, 1, 15, 4.0),
+    (12, 2, 15, 1.0),
+    (13, 3, 15, 4.0),
+    (14, 4, 15, 4.0),
     (15, 1, 19, 4.0),
-    (16, 1, 10, 4.0),
-    (17, 1, 10, 5.0),
+    (16, 6, 10, 4.0),
+    (17, 2, 10, 5.0),
     (18, 1, 8, 5.0),
-    (19, 1, 8, 5.0),
+    (19, 2, 8, 5.0),
     (20, 1, 7, 1.0),
-    (21, 1, 31, 2.0),
-    (22, 1, 32, 3.0),
+    (21, 6, 31, 2.0),
+    (22, 6, 32, 3.0),
     (23, 1, 33, 4.0);
 

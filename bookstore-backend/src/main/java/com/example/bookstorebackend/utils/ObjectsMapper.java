@@ -82,6 +82,15 @@ public class ObjectsMapper {
         return modelMapper.map(genre, GenreDTO.class);
     }
 
+    public static List<GenreDTO> convertGenresToDTOs(List<Genre> genres){
+        List<GenreDTO> list = new ArrayList<>();
+        if(genres == null)
+            return list;
+        for(Genre genre: genres)
+            list.add(convertGenreToDTO(genre));
+        return list;
+    }
+
     public static AuthorDTO convertAuthorToDTO(Author author){
         ModelMapper modelMapper = new ModelMapper();
         PropertyMap<Author, AuthorDTO> answerMap = new PropertyMap<>() {
@@ -127,6 +136,8 @@ public class ObjectsMapper {
                 map().setId(source.getId());
                 map().setFirstname(source.getFirstname());
                 map().setLastname(source.getLastname());
+                map().setEmail(source.getEmail());
+                map().setGenres(convertGenresToDTOs(source.getFavouriteGenres()));
             }
         };
         modelMapper.addMappings(answerMap);
