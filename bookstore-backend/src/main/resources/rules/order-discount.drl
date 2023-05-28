@@ -2,7 +2,6 @@ package rules;
 
 import com.example.bookstorebackend.order.dto.ItemDTO
 import com.example.bookstorebackend.order.dto.OrderDTO
-import com.example.bookstorebackend.utils.enums.BookGenre
 import java.util.Iterator
 import java.util.regex.Pattern
 import java.util.regex.Matcher
@@ -37,7 +36,7 @@ rule "Item price over 2000 and educational genre - 7% discount"
 salience 3
 when
     $order: OrderDTO($items: items)
-    $item: ItemDTO(price > 2000, book.getGenre() == BookGenre.EDUCATIONAL) from $items
+    $item: ItemDTO(price > 2000, book.getGenre().getName().equals("EDUCATIONAL")) from $items
 then
     $item.discount = 7;
     $order.discountReason.add("Applied a discount of 7% on \"" + $item.book.getTitle()
