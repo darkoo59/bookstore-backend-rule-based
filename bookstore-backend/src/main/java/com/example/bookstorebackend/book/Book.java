@@ -1,8 +1,14 @@
 package com.example.bookstorebackend.book;
 
-import com.example.bookstorebackend.utils.enums.BookGenre;
+import com.example.bookstorebackend.genre.Genre;
+import com.example.bookstorebackend.person.model.Author;
+import com.example.bookstorebackend.rating.model.Rating;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
+import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @Getter
@@ -18,9 +24,30 @@ public class Book {
     )
     private Long id;
     private String title;
-    private String author;
+
+    @JsonBackReference(value = "*")
+    @ManyToOne
+    @JoinColumn(name = "author_id")
+    private Author author;
+
     private String publisher;
-    private BookGenre genre;
+
+    @JsonBackReference(value = "*")
+    @ManyToOne
+    @JoinColumn(name = "genre_id")
+    private Genre genre;
     private int numberOfPages;
     private double price;
+    private LocalDate dateOfAddingToBookstore;
+    private LocalDate publishDate;
+    private double averageRating;
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "book")
+    private List<Rating> ratings;
+
+    public double getTotalRatingNumber(){
+        double ratings = 0;
+        for(Rating rating: getRatings())
+            ratings += rating.getRating();
+        return ratings;
+    }
 }

@@ -1,19 +1,15 @@
 package com.example.bookstorebackend.order;
 
-import com.example.bookstorebackend.book.Book;
 import com.example.bookstorebackend.book.BookService;
 import com.example.bookstorebackend.order.dto.*;
 import com.example.bookstorebackend.order.model.Order;
 import com.example.bookstorebackend.orderItem.OrderItem;
 import com.example.bookstorebackend.person.service.UserService;
-import com.example.bookstorebackend.utils.enums.BookGenre;
 import lombok.RequiredArgsConstructor;
 import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,7 +20,6 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final UserService userService;
     private final KieContainer kieContainer;
-    private static final DecimalFormat df = new DecimalFormat("0.00");
 
     public DiscountResponseDTO getPriceWithDiscount(OrderDTO order) {
         KieSession kieSession = kieContainer.newKieSession();
@@ -60,7 +55,7 @@ public class OrderService {
             for (OrderItem item:order.getOrderItems()) {
                 MyItemDTO myItem = new MyItemDTO();
                 myItem.setId(item.getBook().getId());
-                myItem.setAuthor(item.getBook().getAuthor());
+                myItem.setAuthor(item.getBook().getAuthor().getName());
                 myItem.setGenre(item.getBook().getGenre());
                 myItem.setPublisher(item.getBook().getPublisher());
                 myItem.setPrice(item.getBook().getPrice());

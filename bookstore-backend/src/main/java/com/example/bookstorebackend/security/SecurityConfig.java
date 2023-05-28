@@ -57,7 +57,9 @@ public class SecurityConfig {
                 "/bookstore/user/token/refresh",
                 "/bookstore/user/register",
                 "/bookstore/user/logout",
-                "/bookstore/book"
+                "/bookstore/book",
+                "/bookstore/book/characteristics",
+                "/bookstore/book/recommended"
         ).permitAll();
         http.authorizeRequests().anyRequest().authenticated();
         http.addFilter(customAuthenticationFilter);
@@ -70,7 +72,8 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000"));
+        // configuration.setAllowedOrigins(List.of("http://localhost:3000"));
+        configuration.setAllowedOriginPatterns(List.of("*"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
