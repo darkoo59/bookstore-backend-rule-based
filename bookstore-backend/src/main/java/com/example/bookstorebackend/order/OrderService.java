@@ -29,19 +29,24 @@ public class OrderService {
         return new DiscountResponseDTO(order.totalPrice, order.discountReason);
     }
 
-    public void makeDeliveryPaymentOrder(OrderDTO orderDTO, String userEmail) {
+    public void makeDeliveryPaymentOrder(DeliveryPaymentOrderDTO orderDTO, String userEmail) {
         Order order = new Order();
         order.setUser(userService.getUser(userEmail));
         order.setPrice(orderDTO.getTotalPrice());
-        List<OrderItem> itemsToAdd = new ArrayList<OrderItem>();
-        for (ItemDTO item:orderDTO.getItems()) {
+        List<OrderItem> itemsToAdd = new ArrayList<>();
+
+        double itemsPrice = 0;
+        for (DeliveryPaymentItemDTO item : orderDTO.getItems()) {
             OrderItem orderItem = new OrderItem();
-            orderItem.setBook(bookService.getById(item.getBook().getId()));
+            orderItem.setBook(bookService.getById(item.getBookId()));
             orderItem.setOrder(order);
             orderItem.setQuantity(item.getQuantity());
+            itemsPrice += item.getPrice() * item.getQuantity();
             itemsToAdd.add(orderItem);
         }
         order.setOrderItems(itemsToAdd);
+        order.setDiscount((int)(100 - (orderDTO.getTotalPrice() * 100) / itemsPrice));
+
         orderRepository.save(order);
     }
 

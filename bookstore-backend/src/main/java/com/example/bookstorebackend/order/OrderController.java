@@ -1,6 +1,7 @@
 package com.example.bookstorebackend.order;
 
 import com.example.bookstorebackend.book.Book;
+import com.example.bookstorebackend.order.dto.DeliveryPaymentOrderDTO;
 import com.example.bookstorebackend.order.dto.DiscountResponseDTO;
 import com.example.bookstorebackend.order.dto.MyOrdersDTO;
 import com.example.bookstorebackend.order.dto.OrderDTO;
@@ -43,11 +44,12 @@ public class OrderController {
 
     @PostMapping("/delivery-payment")
     @Secured("ROLE_USER")
-    public ResponseEntity<?> MakeDeliveryPaymentOrder(@RequestBody OrderDTO order, HttpServletRequest request) {
+    public ResponseEntity<?> MakeDeliveryPaymentOrder(@RequestBody DeliveryPaymentOrderDTO order, HttpServletRequest request) {
         try {
             orderService.makeDeliveryPaymentOrder(order, AuthUtility.getEmailFromRequest(request));
             return new ResponseEntity<>(OK);
         } catch (Exception e) {
+            System.out.println(e.getMessage());
             return new ResponseEntity<>("Unknown error", BAD_REQUEST);
         }
     }

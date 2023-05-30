@@ -11,5 +11,5 @@ import java.util.List;
 @AllArgsConstructor
 public class DeliveryPaymentOrderDTO {
    public double totalPrice;
-   public List<ItemDTO> items;
+   public List<DeliveryPaymentItemDTO> items;
 }
