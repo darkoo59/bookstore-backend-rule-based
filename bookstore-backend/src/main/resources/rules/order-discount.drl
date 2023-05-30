@@ -8,10 +8,12 @@ import java.util.regex.Matcher
 import java.util.List
 import java.util.ArrayList
 import java.util.Set
-import java.util.HashSet;
+import java.util.HashSet
+import java.util.Map
+import java.util.HashMap;
 
 rule "2 or more items - 10% discount"
-salience 4
+salience 2
 when
     $order: OrderDTO($items: items)
     $item: ItemDTO(quantity >= 2) from $items
@@ -22,7 +24,7 @@ then
 end;
 
 rule "Item price over 3000 - 5% discount"
-salience 2
+salience 4
 when
     $order: OrderDTO($items: items)
     $item: ItemDTO(price > 3000) from $items
@@ -44,7 +46,7 @@ then
 end;
 
 rule "Order has 3 or more order items - 10% discount"
-salience 10
+salience 11
 when
     $order: OrderDTO(items.size() >= 3)
 then
@@ -53,7 +55,7 @@ then
 end;
 
 rule "Order has 5 or more order items - 15% discount"
-salience 11
+salience 10
 when
     $order: OrderDTO(items.size() >= 5)
 then
@@ -84,19 +86,29 @@ then
 
         List<String> stringsToDelete = new ArrayList<>();
         Pattern pattern = Pattern.compile("\"([^\"]*)\"");
-        Set<String> matchedWords = new HashSet<>();
+        Map<String, String> wordReasonMap = new HashMap<>();
 
         for (String reason : $order.discountReason) {
             Matcher matcher = pattern.matcher(reason);
             while (matcher.find()) {
                 String word = matcher.group(1);
-                if (matchedWords.contains(word)) {
-                    stringsToDelete.add(reason);
-                } else {
-                    matchedWords.add(word);
-                }
+                wordReasonMap.put(word, reason);
             }
         }
+
+        for (String reason2 : $order.discountReason) {
+            Matcher matcher2 = pattern.matcher(reason2);
+            while (matcher2.find()) {
+                String word2 = matcher2.group(1);
+                if (wordReasonMap.get(word2).equals(reason2)) {
+                    continue;
+                }
+                stringsToDelete.add(reason2);
+            }
+        }
+
+        $order.discountReason.removeAll(stringsToDelete);
+
 
         $order.discountReason.removeAll(stringsToDelete);
     }
