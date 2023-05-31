@@ -94,4 +94,14 @@ public class User extends Person{
 
         return ratingsToReturn;
     }
+
+    public List<Book> getBooksThatUserLikes() {
+        var books = new ArrayList<Book>();
+        for (var rating: ratings) {
+            if (rating.getRating() >= 4.0) {
+                books.add(rating.getBook());
+            }
+        }
+        return books;
+    }
 }

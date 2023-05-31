@@ -11,7 +11,8 @@ import java.util.ArrayList
 import java.util.Collections;
 import com.example.bookstorebackend.person.model.User
 import com.example.bookstorebackend.person.model.Person
-import com.example.bookstorebackend.book.BookCharacteristics;
+import com.example.bookstorebackend.book.BookCharacteristics
+import com.example.bookstorebackend.book.BookForRecommendation;
 
 global java.util.ArrayList recommendedBooks;
 global com.example.bookstorebackend.person.model.User specificUser;
@@ -113,4 +114,19 @@ then
                 }
             recommendedBooks.addAll(booksLikedByUser);
         }
+end
+
+rule "Add points to books that are similar to books that user likes"
+when
+    $user: User(id == specificUser.getId() && getRatingsNumber() >= 10)
+    $otherUser: User(id != specificUser.getId())
+    $thisBook: Book(id != 0)
+    $books: List() from $user.getBooksThatUserLikes()
+then
+    List<BookForRecommendation> booksList = new ArrayList<>();
+    for (var otherBook: $books) {
+        if ($thisBook.areBooksSimilar((Book)otherBook)) {
+            booksList.add(new BookForRecommendation((Book)otherBook, 1));
+        }
+    }
 end

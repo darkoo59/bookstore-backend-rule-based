@@ -9,6 +9,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Getter
@@ -49,5 +50,22 @@ public class Book {
         for(Rating rating: getRatings())
             ratings += rating.getRating();
         return ratings;
+    }
+
+    public boolean areBooksSimilar(Book otherBook) {
+        double similarityCount = 0;
+        int userCount = 0;
+        for (var thisBookRating: this.getRatings()) {
+            for (var otherBookRating: otherBook.getRatings()) {
+                if (!thisBookRating.getUser().getId().equals(otherBookRating.getUser().getId())) {
+                    continue;
+                }
+                userCount++;
+                if (Math.abs(thisBookRating.getRating() - otherBookRating.getRating()) <= 1) {
+                    similarityCount++;
+                }
+            }
+        }
+        return userCount != 0 && similarityCount / userCount >= 0.7;
     }
 }
