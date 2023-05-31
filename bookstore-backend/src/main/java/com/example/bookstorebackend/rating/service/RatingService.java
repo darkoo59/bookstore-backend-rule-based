@@ -27,6 +27,7 @@ public class RatingService {
         bookToUpdate.setAverageRating(getBookAverageRating(rating.getBookId(), rating.getRating()));
         bookService.save(bookToUpdate);
         Rating newRating = new Rating();
+        newRating.setId(generateId());
         newRating.setRating(rating.getRating());
         newRating.setUser(userService.getUser(emailFromRequest));
         newRating.setBook(bookService.getById(rating.getBookId()));
@@ -34,7 +35,7 @@ public class RatingService {
     }
 
     public double getBookAverageRating(Long bookId, double newRating){
-        List<Rating> allRatings = ratingRepository.getByBookId(bookId);
+        List<Rating> allRatings = bookService.getById(bookId).getRatings();
         double averageRating = newRating;
         if(!allRatings.isEmpty()){
             for (Rating rating:allRatings) {
@@ -53,4 +54,15 @@ public class RatingService {
     public Integer getNumberOfRatingsForUser(String emailFromRequest) {
         return userService.getUser(emailFromRequest).getRatingsNumber();
     }
+
+    public long generateId() {
+        long maxId = 0;
+        for(Rating rating: ratingRepository.findAll()){
+            if(rating.getId() >= maxId){
+                maxId = rating.getId() + 1;
+            }
+        }
+        return maxId;
+    }
+
 }

@@ -15,11 +15,11 @@ import lombok.*;
 @AllArgsConstructor
 public class Rating {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+//    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @JsonBackReference(value = "*")
-    @ManyToOne()
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "book_id", referencedColumnName = "id")
     private Book book;
 
@@ -29,5 +29,6 @@ public class Rating {
     @ManyToOne()
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
+
 
 }

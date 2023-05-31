@@ -108,7 +108,6 @@ when
 then
     System.out.println("Rule [Users similarity based on Pearson correlation coefficient] - fired");
     double similarity = $user.calculateSimilarity($user2);
-    System.out.println(similarity);
     if (similarity >= 0.5) {
         List<String> booksLikedBySimilarUser = $user2.getRatings().stream()
             .filter(rating -> rating.getRating() >= 4.0)

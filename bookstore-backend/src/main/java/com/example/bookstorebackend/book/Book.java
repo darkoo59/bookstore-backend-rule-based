@@ -66,7 +66,6 @@ public class Book {
                 }
             }
         }
-        System.out.println("Rezultat = " + similarityCount / userCount);
         return userCount != 0 && similarityCount / userCount >= 0.7;
     }
 }
