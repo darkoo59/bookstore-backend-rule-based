@@ -23,7 +23,7 @@ public class RatingService {
     private final BookService bookService;
 
     public void makeRating(RatingDTO rating, String emailFromRequest) {
-        ifRatingExistDelete(rating.getBookId(), emailFromRequest);
+        //ifRatingExistDelete(rating.getBookId(), emailFromRequest);
         Rating newRating = new Rating();
         newRating.setRating(rating.getRating());
         newRating.setUser(userService.getUser(emailFromRequest));

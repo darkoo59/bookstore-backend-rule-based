@@ -41,7 +41,7 @@ public class Book {
     private LocalDate dateOfAddingToBookstore;
     private LocalDate publishDate;
     private double averageRating;
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "book")
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "book")
     private List<Rating> ratings;
 
     public double getTotalRatingNumber(){
