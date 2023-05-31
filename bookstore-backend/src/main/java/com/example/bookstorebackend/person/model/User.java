@@ -89,16 +89,6 @@ public class User extends Person{
                 .orElse(0.0);
     }
 
-    public List<Rating> getRatingsGreaterThenFour(){
-        List<Rating> ratingsToReturn = new ArrayList<>();
-        for(Rating rating: ratings) {
-            if(rating.getRating() >= 4.0)
-                ratingsToReturn.add(rating);
-        }
-
-        return ratingsToReturn;
-    }
-
     public List<Book> getBooksThatUserLikes() {
         var books = new ArrayList<Book>();
         for (var rating: ratings) {

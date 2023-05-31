@@ -91,7 +91,6 @@ public class BookService {
             System.out.println("Author: " + book.getAuthor().getName());
             System.out.println("##");
         }
-        System.out.println("Na kraju ima knjiga : "+ recommendedBooks.size());
         System.out.println("*************");
 
         kieSession.dispose();

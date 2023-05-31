@@ -22,7 +22,6 @@ import java.util.TreeMap
 import java.util.stream.Stream
 import java.util.LinkedHashMap
 import java.time.LocalDate;
-import com.example.bookstorebackend.book.BookForRecommendation;
 
 global java.util.ArrayList recommendedBooks;
 global com.example.bookstorebackend.person.model.User specificUser;
@@ -107,46 +106,52 @@ when
     $user2: User(id != specificUser.getId())
     $books: List(size > 0) from collect(Book())
 then
-        System.out.println("Rule [Users similarity based on Pearson correlation coefficient] - fired");
-        double similarity = $user.calculateSimilarity($user2);
-        if (similarity >= 0.5) {
-            List<String> booksLikedBySimilarUser = $user2.getRatings().stream()
-                .filter(rating -> rating.getRating() >= 4.0)
-                .map(rating -> rating.getBook().getId().toString())
-                .collect(Collectors.toList());
-            List<Book> allBooks = new ArrayList<>($books);
-            List<Book> booksLikedByUser = new ArrayList<>();
-            for (String bookId : booksLikedBySimilarUser) {
-                for(Book book : allBooks){
-                    if(book.getId() == Long.parseLong(bookId)){
-                        booksLikedByUser.add(book);
-                        if (recommendedBooksWithScores.containsKey(book)) {
-                            // Book already exists, increment the score by 1
-                            Integer score = (Integer)recommendedBooksWithScores.get(book);
-                            recommendedBooksWithScores.put(book, score + 1);
-                        } else {
-                            // Book doesn't exist, add it with a score of 1
-                            recommendedBooksWithScores.put(book, 1);
-                        }
+    System.out.println("Rule [Users similarity based on Pearson correlation coefficient] - fired");
+    double similarity = $user.calculateSimilarity($user2);
+    if (similarity >= 0.5) {
+        List<String> booksLikedBySimilarUser = $user2.getRatings().stream()
+            .filter(rating -> rating.getRating() >= 4.0)
+            .map(rating -> rating.getBook().getId().toString())
+            .collect(Collectors.toList());
+        List<Book> allBooks = new ArrayList<>($books);
+        List<Book> booksLikedByUser = new ArrayList<>();
+        for (String bookId : booksLikedBySimilarUser) {
+            for(Book book : allBooks){
+                if(book.getId() == Long.parseLong(bookId)){
+                    booksLikedByUser.add(book);
+                    if (recommendedBooksWithScores.containsKey(book)) {
+                        // Book already exists, increment the score by 1
+                        Integer score = (Integer)recommendedBooksWithScores.get(book);
+                        recommendedBooksWithScores.put(book, score + 1);
+                    } else {
+                        // Book doesn't exist, add it with a score of 1
+                        recommendedBooksWithScores.put(book, 1);
                     }
                 }
-                }
-            recommendedBooks.addAll(booksLikedByUser);
-        }
+            }
+            }
+        recommendedBooks.addAll(booksLikedByUser);
+    }
 end
 
-rule "Add points to books that are similar to books that user likes"
+rule "Recommend books based on similarity with other users"
 salience 20
 when
     $user: User(id == specificUser.getId() && getRatingsNumber() >= 10)
     $otherUser: User(id != specificUser.getId())
-    $thisBook: Book(id != 0)
-    $books: List() from $user.getBooksThatUserLikes()
+    $books: List(size > 0) from collect(Book())
+    $thisBook: Book() from $user.getBooksThatUserLikes()
 then
-    List<BookForRecommendation> booksList = new ArrayList<>();
-    for (var otherBook: $books) {
-        if ($thisBook.areBooksSimilar((Book)otherBook)) {
-            booksList.add(new BookForRecommendation((Book)otherBook, 1));
+    System.out.println("Rule [Recommend books based on similarity with other users] - fired");
+    List<Book> allBooks = new ArrayList<>($books);
+    for (Book book: allBooks) {
+        if ($thisBook.areBooksSimilar(book)) {
+            if (recommendedBooksWithScores.containsKey(book)) {
+                Integer score = (Integer)recommendedBooksWithScores.get(book);
+                recommendedBooksWithScores.put(book, score + 1);
+            } else {
+                recommendedBooksWithScores.put(book, 1);
+            }
         }
     }
 end
@@ -254,4 +259,5 @@ then
               .map(Map.Entry::getKey)
               .toList();
       recommendedBooks = new ArrayList(afterTopTwenty);
+
 end
