@@ -22,6 +22,7 @@ import java.util.TreeMap
 import java.util.stream.Stream
 import java.util.LinkedHashMap
 import java.time.LocalDate;
+import com.example.bookstorebackend.book.BookForRecommendation;
 
 global java.util.ArrayList recommendedBooks;
 global com.example.bookstorebackend.person.model.User specificUser;
@@ -134,6 +135,22 @@ then
         }
 end
 
+rule "Add points to books that are similar to books that user likes"
+salience 20
+when
+    $user: User(id == specificUser.getId() && getRatingsNumber() >= 10)
+    $otherUser: User(id != specificUser.getId())
+    $thisBook: Book(id != 0)
+    $books: List() from $user.getBooksThatUserLikes()
+then
+    List<BookForRecommendation> booksList = new ArrayList<>();
+    for (var otherBook: $books) {
+        if ($thisBook.areBooksSimilar((Book)otherBook)) {
+            booksList.add(new BookForRecommendation((Book)otherBook, 1));
+        }
+    }
+end
+
 rule "Recommend books based on user preferences"
 salience 15
 no-loop true
@@ -237,5 +254,4 @@ then
               .map(Map.Entry::getKey)
               .toList();
       recommendedBooks = new ArrayList(afterTopTwenty);
-
 end
