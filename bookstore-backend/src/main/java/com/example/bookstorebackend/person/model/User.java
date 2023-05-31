@@ -2,6 +2,7 @@ package com.example.bookstorebackend.person.model;
 
 import com.example.bookstorebackend.genre.Genre;
 import com.example.bookstorebackend.book.Book;
+import com.example.bookstorebackend.order.model.Order;
 import com.example.bookstorebackend.orderItem.OrderItem;
 import jakarta.persistence.*;
 import com.example.bookstorebackend.rating.model.Rating;
@@ -29,6 +30,9 @@ public class User extends Person{
     @OneToMany(mappedBy = "user")
     @JsonIgnore
     private List<Rating> ratings;
+    @OneToMany(mappedBy = "user")
+    @JsonIgnore
+    private List<Order> orders;
 
     public int getRatingsNumber() {
         return this.getRatings().size();

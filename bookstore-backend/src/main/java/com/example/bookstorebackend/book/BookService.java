@@ -12,8 +12,10 @@ import org.kie.api.runtime.KieSession;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Service
@@ -63,17 +65,16 @@ public class BookService {
         if(genres.isEmpty())
             return new ArrayList<>();
         List<Book> recommendedBooks = new ArrayList<>();
+        ConcurrentHashMap<Book, Integer> recommendedBooksWithScores= new ConcurrentHashMap<Book, Integer>();
         KieSession kieSession = kieContainer.newKieSession();
         kieSession.setGlobal("recommendedBooks", recommendedBooks);
+        kieSession.setGlobal("recommendedBooksWithScores", recommendedBooksWithScores);
         kieSession.setGlobal("specificUser", specificUser.get());
         List<Author> authors = authorRepository.findAll();
         for (Author author : authors)
             kieSession.insert(author);
         for ( Genre genre: genres)
             kieSession.insert(genre);
-//        List<User> otherUsers = userRepository.findAll().stream()
-//                .filter(u -> u.getId() != specificUser.get().getId())
-//                .collect(Collectors.toList());
         List<Book> allBooks = bookRepository.findAll();
         for ( Book book: allBooks) {
             kieSession.insert(book);
@@ -90,6 +91,7 @@ public class BookService {
             System.out.println("Author: " + book.getAuthor().getName());
             System.out.println("##");
         }
+        System.out.println("Na kraju ima knjiga : "+ recommendedBooks.size());
         System.out.println("*************");
 
         kieSession.dispose();

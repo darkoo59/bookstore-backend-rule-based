@@ -4,6 +4,9 @@ import com.example.bookstorebackend.book.Book;
 import com.example.bookstorebackend.person.model.Author
 import com.example.bookstorebackend.rating.model.Rating;
 import com.example.bookstorebackend.genre.Genre;
+import com.example.bookstorebackend.genre.Genre;
+import com.example.bookstorebackend.order.model.Order;
+import com.example.bookstorebackend.orderItem.OrderItem;
 import java.util.List;
 import java.util.stream.Collectors
 import java.util.Comparator
@@ -11,13 +14,21 @@ import java.util.ArrayList
 import java.util.Collections;
 import com.example.bookstorebackend.person.model.User
 import com.example.bookstorebackend.person.model.Person
-import com.example.bookstorebackend.book.BookCharacteristics;
+import com.example.bookstorebackend.book.BookCharacteristics
+import java.util.Set
+import java.util.HashSet
+import java.util.Map
+import java.util.TreeMap
+import java.util.stream.Stream
+import java.util.LinkedHashMap
+import java.time.LocalDate;
 
 global java.util.ArrayList recommendedBooks;
 global com.example.bookstorebackend.person.model.User specificUser;
+global java.util.concurrent.ConcurrentHashMap<Book,Integer> recommendedBooksWithScores;
 
 rule "Remove Authors Without Books"
-salience 30
+salience 50
 no-loop true
 when
     $author: Author(getBookNumber() == 0)
@@ -27,7 +38,7 @@ end
 
 rule "Determine Author Genres"
 lock-on-active
-salience 25
+salience 45
 when
     $author: Author()
     $genres: List(size > 0) from collect(Genre())
@@ -45,7 +56,7 @@ then
 end
 
 rule "Collect All Authors"
-salience 20
+salience 40
 no-loop true
 when
     $authors: List(size > 0) from collect(Author(isCorrectGenre() == true))
@@ -63,7 +74,7 @@ then
 end
 
 rule "Insert Books From Popular Authors"
-salience 15
+salience 35
 no-loop true
 when
   $author: Author(isPopular() == true)
@@ -74,7 +85,7 @@ then
 end
 
 rule "Select Top 10 Books"
-salience 10
+salience 30
 no-loop true
 when
   $books: List(size > 0) from collect(Book())
@@ -88,7 +99,7 @@ then
 end
 
 rule "Users similarity based on Pearson correlation coefficient"
-salience 5
+salience 25
 no-loop true
 when
     $user: User(id == specificUser.getId() && getRatingsNumber() >= 10)
@@ -108,9 +119,163 @@ then
                 for(Book book : allBooks){
                     if(book.getId() == Long.parseLong(bookId)){
                         booksLikedByUser.add(book);
+                        if (recommendedBooksWithScores.containsKey(book)) {
+                            // Book already exists, increment the score by 1
+                            Integer score = (Integer)recommendedBooksWithScores.get(book);
+                            recommendedBooksWithScores.put(book, score + 1);
+                        } else {
+                            // Book doesn't exist, add it with a score of 1
+                            recommendedBooksWithScores.put(book, 1);
+                        }
                     }
                 }
                 }
             recommendedBooks.addAll(booksLikedByUser);
         }
+end
+
+rule "Book recommendation based on similarity"
+salience 20
+no-loop true
+when
+    $user: User(id == specificUser.getId() && getRatingsNumber() >= 10)
+    $books: List(size > 0) from collect(Book())
+then
+    System.out.println("Rule [Book recommendation based on similarity] - fired");
+
+    List<Rating> userRatings = $user.getRatings();
+    List<Book> allBooks = new ArrayList<>($books);
+    for (Book book : allBooks) {
+        List<Rating> bookRatings = book.getRatings();
+        List<Rating> overlappingRatings = userRatings.stream()
+                .filter(userRating -> bookRatings.stream()
+                        .anyMatch(bookRating -> userRating.getUser().getId().equals(bookRating.getUser().getId())))
+                .collect(Collectors.toList());
+        long commonRaters = overlappingRatings.stream()
+                .filter(userRating ->
+                        bookRatings.stream()
+                                .anyMatch(bookRating ->
+                                        Math.abs(userRating.getRating() - bookRating.getRating()) <= 1.0))
+                .count();
+        double similarity = (double) commonRaters / (double) overlappingRatings.size();
+        if (similarity >= 0.7) {
+            recommendedBooks.add(book);
+            if (recommendedBooksWithScores.containsKey(book)) {
+                // Book already exists, increment the score by 1
+                Integer score = (Integer)recommendedBooksWithScores.get(book);
+                recommendedBooksWithScores.put(book, score + 1);
+            } else {
+                // Book doesn't exist, add it with a score of 1
+                recommendedBooksWithScores.put(book, 1);
+            }
+        }
+    }
+    Set<Book> setWithoutDuplicates = new HashSet<>(recommendedBooks);
+    recommendedBooks = new ArrayList<>(setWithoutDuplicates);
+end
+
+rule "Recommend books based on user preferences"
+salience 15
+no-loop true
+when
+    $user: User(id == specificUser.getId() && getRatingsNumber() >= 10)
+    $authors: List(size > 0) from collect(Author())
+    $genres: List(size > 0) from collect(Genre())
+    $books: List(size > 0) from collect(Book())
+then
+    System.out.println("Rule [Recommend books based on user preferences] - fired");
+    // Apply book recommendations based on user preferences
+    List<Author> allAuthors = new ArrayList<>($authors);
+    List<Genre> allGenres = new ArrayList<>($genres);
+    List<Book> recommendedBooksByAuthor = new ArrayList<>();
+    List<Order> userOrders = $user.getOrders();
+    for(Author author : allAuthors){
+        int numOfAuthorBuys = 0;
+        for (Order order : userOrders) {
+            if(order.isOrderInLastSixMonths()){
+                for(OrderItem orderItem : order.getOrderItems()){
+                    if(orderItem.getBook().getAuthor().getId().equals(author.getId()))
+                        numOfAuthorBuys++;
+                }
+            }
+        }
+        if(numOfAuthorBuys >= 3){
+            for(Book bookIter: author.getBooks()){
+                if (recommendedBooksWithScores.containsKey(bookIter)) {
+                    // Book already exists, increment the score by 1
+                    Integer score = (Integer)recommendedBooksWithScores.get(bookIter);
+                    recommendedBooksWithScores.put(bookIter, score + 1);
+                } else {
+                    // Book doesn't exist, add it with a score of 1
+                    recommendedBooksWithScores.put(bookIter, 1);
+                }
+            }
+            recommendedBooks.addAll(author.getBooks());
+        }
+    }
+    List<Genre> genresToRecommend = new ArrayList<>();
+    for(Genre genre: allGenres) {
+        int numOfGenreBuys = 0;
+        int numOfBooksBuys = 0;
+        for (Order orderIter : userOrders) {
+            if(orderIter.isOrderInLastSixMonths()){
+                for(OrderItem orderItemIter : orderIter.getOrderItems()){
+                    numOfBooksBuys++;
+                    if(orderItemIter.getBook().getGenre().getId().equals(genre.getId()))
+                        numOfGenreBuys++;
+                }
+            }
+        }
+        if((double)numOfGenreBuys/numOfBooksBuys >= 0.3){
+            genresToRecommend.add(genre);
+        }
+    }
+    List<Book> allBooks = new ArrayList<>($books);
+    for(Book book: allBooks){
+        if(genresToRecommend.contains(book.getGenre())){
+            recommendedBooks.add(book);
+            if (recommendedBooksWithScores.containsKey(book)) {
+                // Book already exists, increment the score by 1
+                Integer scoreTemp = (Integer)recommendedBooksWithScores.get(book);
+                recommendedBooksWithScores.put(book, scoreTemp + 1);
+            } else {
+                // Book doesn't exist, add it with a score of 1
+                recommendedBooksWithScores.put(book, 1);
+            }
+            }
+    }
+    Set<Book> setWithoutDuplicates = new HashSet<>(recommendedBooks);
+    recommendedBooks = new ArrayList<>(setWithoutDuplicates);
+end
+
+rule "Final recommendation"
+salience 10
+no-loop true
+when
+      $user: User(id == specificUser.getId() && getRatingsNumber() >= 10)
+then
+      System.out.println("Rule [Final recommendation] - fired");
+      List<Map.Entry<Book, Integer>> list = new ArrayList<>(recommendedBooksWithScores.entrySet());
+      list.sort(Map.Entry.comparingByValue());
+      Map<Book, Integer> sortedMap = new LinkedHashMap<>();
+      for (Map.Entry<Book, Integer> entry : list) {
+          sortedMap.put(entry.getKey(), entry.getValue());
+      }
+      recommendedBooks = new ArrayList(sortedMap.entrySet().stream().map(Map.Entry::getKey).toList());
+      List<Book> afterTopTwenty = sortedMap.entrySet().stream()
+              .sorted((e1, e2) -> {
+                  int scoreComparison = e2.getValue().compareTo(e1.getValue()); // Sort by score in descending order
+
+                  if (scoreComparison == 0) {
+                      LocalDate date1 = e1.getKey().getDateOfAddingToBookstore();
+                      LocalDate date2 = e2.getKey().getDateOfAddingToBookstore();
+                      return date2.compareTo(date1); // Sort by date of adding to bookstore in descending order
+                  }
+                  return scoreComparison;
+              })
+              .limit(20)
+              .map(Map.Entry::getKey)
+              .toList();
+      recommendedBooks = new ArrayList(afterTopTwenty);
+
 end

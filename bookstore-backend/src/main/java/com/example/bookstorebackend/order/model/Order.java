@@ -6,6 +6,7 @@ import com.example.bookstorebackend.person.model.User;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Entity(name = "order_")
@@ -31,4 +32,15 @@ public class Order {
     private Double price;
 
     private int discount;
+    private LocalDate orderDate;
+
+    public boolean isOrderInLastSixMonths() {
+        LocalDate currentDate = LocalDate.now();
+        LocalDate sixMonthsAgo = currentDate.minusMonths(6);
+        if (orderDate.isAfter(sixMonthsAgo) || orderDate.isEqual(sixMonthsAgo)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }

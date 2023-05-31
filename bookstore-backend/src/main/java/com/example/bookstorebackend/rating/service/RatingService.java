@@ -23,25 +23,28 @@ public class RatingService {
     private final BookService bookService;
 
     public void makeRating(RatingDTO rating, String emailFromRequest) {
-        //ifRatingExistDelete(rating.getBookId(), emailFromRequest);
+        Book bookToUpdate = bookService.getById(rating.getBookId());
+        bookToUpdate.setAverageRating(getBookAverageRating(rating.getBookId(), rating.getRating()));
+        bookService.save(bookToUpdate);
         Rating newRating = new Rating();
         newRating.setRating(rating.getRating());
         newRating.setUser(userService.getUser(emailFromRequest));
         newRating.setBook(bookService.getById(rating.getBookId()));
+        System.out.println(newRating.getRating() + " vrednost ratinga");
+        System.out.println(newRating.getId() + "vrednost id-a");
+        System.out.println(newRating.getBook().getId() + "vrednost book id-a");
+        System.out.println(newRating.getUser().getId() + "vrednost user id-a");
         ratingRepository.save(newRating);
-        Book bookToUpdate = bookService.getById(rating.getBookId());
-        bookToUpdate.setAverageRating(getBookAverageRating(rating.getBookId()));
-        bookService.save(bookToUpdate);
     }
 
-    public double getBookAverageRating(Long bookId){
+    public double getBookAverageRating(Long bookId, double newRating){
         List<Rating> allRatings = ratingRepository.getByBookId(bookId);
-        double averageRating = 0.0;
+        double averageRating = newRating;
         if(!allRatings.isEmpty()){
             for (Rating rating:allRatings) {
                 averageRating += rating.getRating();
             }
-            return averageRating/allRatings.size();
+            return averageRating/(allRatings.size() + 1);
         }
         return averageRating;
     }
@@ -51,14 +54,7 @@ public class RatingService {
         return ObjectsMapper.convertRatingsToRatingDTO(userRatings);
     }
 
-    private void ifRatingExistDelete(Long bookId, String emailFromRequest) {
-        List<Rating> userRatings = ratingRepository.getByUserId(userService.getUser(emailFromRequest).getId());
-        if(userRatings.isEmpty())
-            return;
-        for (Rating rating:userRatings) {
-            if (rating.getBook().getId().equals(bookId)) {
-                ratingRepository.deleteById(rating.getId());
-            }
-        }
+    public Integer getNumberOfRatingsForUser(String emailFromRequest) {
+        return userService.getUser(emailFromRequest).getRatingsNumber();
     }
 }

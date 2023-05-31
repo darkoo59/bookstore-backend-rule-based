@@ -47,4 +47,9 @@ public class RatingController {
     public ResponseEntity<List<RatingDTO>> getAllForUser(HttpServletRequest request){
         return new ResponseEntity<>(ratingService.getAllForUser(AuthUtility.getEmailFromRequest(request)), OK);
     }
+    @GetMapping("/number-of-ratings")
+    @Secured("ROLE_USER")
+    public ResponseEntity<Integer> getNumberOfRatings(HttpServletRequest request){
+        return new ResponseEntity<>(ratingService.getNumberOfRatingsForUser(AuthUtility.getEmailFromRequest(request)), OK);
+    }
 }

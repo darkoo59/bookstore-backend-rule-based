@@ -11,7 +11,9 @@ import org.kie.api.runtime.KieSession;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.time.LocalDate;
 
 @RequiredArgsConstructor
 @Service
@@ -46,6 +48,7 @@ public class OrderService {
         }
         order.setOrderItems(itemsToAdd);
         order.setDiscount((int)(100 - (orderDTO.getTotalPrice() * 100) / itemsPrice));
+        order.setOrderDate(LocalDate.now());
 
         orderRepository.save(order);
     }
