@@ -30,10 +30,6 @@ public class RatingService {
         newRating.setRating(rating.getRating());
         newRating.setUser(userService.getUser(emailFromRequest));
         newRating.setBook(bookService.getById(rating.getBookId()));
-        System.out.println(newRating.getRating() + " vrednost ratinga");
-        System.out.println(newRating.getId() + "vrednost id-a");
-        System.out.println(newRating.getBook().getId() + "vrednost book id-a");
-        System.out.println(newRating.getUser().getId() + "vrednost user id-a");
         ratingRepository.save(newRating);
     }
 

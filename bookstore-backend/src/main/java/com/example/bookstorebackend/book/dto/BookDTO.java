@@ -22,4 +22,5 @@ public class BookDTO {
     private List<RatingDTO> ratings;
     private int numberOfPages;
     private double price;
+    private double averageRating;
 }

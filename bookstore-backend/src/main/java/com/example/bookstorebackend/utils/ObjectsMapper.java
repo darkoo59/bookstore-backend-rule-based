@@ -54,6 +54,7 @@ public class ObjectsMapper {
                 map().setPublisher(source.getPublisher());
                 map().setRatings(convertRatingsToDTOs(source.getRatings()));
                 map().setGenre(convertGenreToDTO(source.getGenre()));
+                map().setAverageRating(source.getAverageRating());
             }
         };
         modelMapper.addMappings(answerMap);
