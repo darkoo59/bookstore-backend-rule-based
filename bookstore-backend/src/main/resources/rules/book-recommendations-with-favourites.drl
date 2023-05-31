@@ -108,6 +108,7 @@ when
 then
     System.out.println("Rule [Users similarity based on Pearson correlation coefficient] - fired");
     double similarity = $user.calculateSimilarity($user2);
+    System.out.println(similarity);
     if (similarity >= 0.5) {
         List<String> booksLikedBySimilarUser = $user2.getRatings().stream()
             .filter(rating -> rating.getRating() >= 4.0)
@@ -134,26 +135,44 @@ then
     }
 end
 
-rule "Recommend books based on similarity with other users"
+rule "Book recommendation based on similarity"
 salience 20
+no-loop true
 when
     $user: User(id == specificUser.getId() && getRatingsNumber() >= 10)
-    $otherUser: User(id != specificUser.getId())
     $books: List(size > 0) from collect(Book())
-    $thisBook: Book() from $user.getBooksThatUserLikes()
 then
-    System.out.println("Rule [Recommend books based on similarity with other users] - fired");
+    System.out.println("Rule [Book recommendation based on similarity] - fired");
+
+    List<Rating> userRatings = $user.getRatings();
     List<Book> allBooks = new ArrayList<>($books);
-    for (Book book: allBooks) {
-        if ($thisBook.areBooksSimilar(book)) {
+    for (Book book : allBooks) {
+        List<Rating> bookRatings = book.getRatings();
+        List<Rating> overlappingRatings = userRatings.stream()
+                .filter(userRating -> bookRatings.stream()
+                        .anyMatch(bookRating -> userRating.getUser().getId().equals(bookRating.getUser().getId())))
+                .collect(Collectors.toList());
+        long commonRaters = overlappingRatings.stream()
+                .filter(userRating ->
+                        bookRatings.stream()
+                                .anyMatch(bookRating ->
+                                        Math.abs(userRating.getRating() - bookRating.getRating()) <= 1.0))
+                .count();
+        double similarity = (double) commonRaters / (double) overlappingRatings.size();
+        if (similarity >= 0.7) {
+            recommendedBooks.add(book);
             if (recommendedBooksWithScores.containsKey(book)) {
+                // Book already exists, increment the score by 1
                 Integer score = (Integer)recommendedBooksWithScores.get(book);
                 recommendedBooksWithScores.put(book, score + 1);
             } else {
+                // Book doesn't exist, add it with a score of 1
                 recommendedBooksWithScores.put(book, 1);
             }
         }
     }
+    Set<Book> setWithoutDuplicates = new HashSet<>(recommendedBooks);
+    recommendedBooks = new ArrayList<>(setWithoutDuplicates);
 end
 
 rule "Recommend books based on user preferences"
@@ -231,7 +250,7 @@ then
 end
 
 rule "Final recommendation"
-salience 10
+salience 5
 no-loop true
 when
       $user: User(id == specificUser.getId() && getRatingsNumber() >= 10)
@@ -259,5 +278,4 @@ then
               .map(Map.Entry::getKey)
               .toList();
       recommendedBooks = new ArrayList(afterTopTwenty);
-
 end
