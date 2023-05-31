@@ -25,6 +25,7 @@ public class BookService {
     private final AuthorRepository authorRepository;
     private final KieContainer kieContainer;
     private final UserRepository userRepository;
+    private final KieContainer kieContainerNewUser;
 
     public List<Book> getAll() { return this.bookRepository.findAll(); }
     public Book getById(long id) { return this.bookRepository.findById(id).get(); }
@@ -57,10 +58,40 @@ public class BookService {
         return bookCharacteristicsList;
     }
 
+    public List<Book> getRecommendedBooksForNewUser(User user) {
+        List<Genre> genres = user.getFavouriteGenres();
+        if(genres.isEmpty())
+            return new ArrayList<>();
+
+        List<Book> recommendedBooks = new ArrayList<>();
+        KieSession kieSession = kieContainerNewUser.newKieSession();
+        kieSession.setGlobal("recommendedBooks", recommendedBooks);
+        List<Author> authors = authorRepository.findAll();
+        for (Author author : authors)
+            kieSession.insert(author);
+        for ( Genre genre: genres)
+            kieSession.insert(genre);
+        kieSession.fireAllRules();
+
+        for (Book book : recommendedBooks){
+            System.out.println("##");
+            System.out.println(book.getTitle() + ": " + book.getAverageRating());
+            System.out.println("Author: " + book.getAuthor().getName());
+            System.out.println("##");
+        }
+        System.out.println("*************");
+
+        kieSession.dispose();
+        return recommendedBooks;
+    }
+
     public List<Book> getRecommendedBooks(String email) throws Exception {
         Optional<User> specificUser = userRepository.findByEmail(email);
         if(specificUser.isEmpty())
             throw new Exception("No user found");
+        if(specificUser.get().getRatings().size() < 10){
+            return getRecommendedBooksForNewUser(specificUser.get());
+        }
         List<Genre> genres = specificUser.get().getFavouriteGenres();
         if(genres.isEmpty())
             return new ArrayList<>();
