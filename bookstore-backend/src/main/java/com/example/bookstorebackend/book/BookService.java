@@ -1,5 +1,6 @@
 package com.example.bookstorebackend.book;
 
+import com.example.bookstorebackend.BookstoreBackendApplication;
 import com.example.bookstorebackend.genre.Genre;
 import com.example.bookstorebackend.person.model.Author;
 import com.example.bookstorebackend.person.model.User;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -54,21 +56,32 @@ public class BookService {
     }
 
     public List<Book> getRecommendedBooks(String email) throws Exception {
-        Optional<User> user = userRepository.findByEmail(email);
-        if(user.isEmpty())
+        Optional<User> specificUser = userRepository.findByEmail(email);
+        if(specificUser.isEmpty())
             throw new Exception("No user found");
-        List<Genre> genres = user.get().getFavouriteGenres();
+        List<Genre> genres = specificUser.get().getFavouriteGenres();
         if(genres.isEmpty())
             return new ArrayList<>();
-
         List<Book> recommendedBooks = new ArrayList<>();
         KieSession kieSession = kieContainer.newKieSession();
         kieSession.setGlobal("recommendedBooks", recommendedBooks);
+        kieSession.setGlobal("specificUser", specificUser.get());
         List<Author> authors = authorRepository.findAll();
         for (Author author : authors)
             kieSession.insert(author);
         for ( Genre genre: genres)
             kieSession.insert(genre);
+//        List<User> otherUsers = userRepository.findAll().stream()
+//                .filter(u -> u.getId() != specificUser.get().getId())
+//                .collect(Collectors.toList());
+        List<Book> allBooks = bookRepository.findAll();
+        for ( Book book: allBooks) {
+            kieSession.insert(book);
+        }
+        List<User> allUsers = userRepository.findAll();
+        for ( User user: allUsers) {
+            kieSession.insert(user);
+        }
         kieSession.fireAllRules();
 
         for (Book book : recommendedBooks){

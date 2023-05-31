@@ -9,8 +9,12 @@ import java.util.stream.Collectors
 import java.util.Comparator
 import java.util.ArrayList
 import java.util.Collections;
+import com.example.bookstorebackend.person.model.User
+import com.example.bookstorebackend.person.model.Person
+import com.example.bookstorebackend.book.BookCharacteristics;
 
 global java.util.ArrayList recommendedBooks;
+global com.example.bookstorebackend.person.model.User specificUser;
 
 rule "Remove Authors Without Books"
 salience 30
@@ -74,9 +78,39 @@ salience 10
 no-loop true
 when
   $books: List(size > 0) from collect(Book())
+  $user: User(id == specificUser.getId() && getRatingsNumber() < 10)
 then
+    System.out.println("Rule [Select Top 10 Books] - fired");
     List<Book> sortedBooks = new ArrayList<>($books);
     sortedBooks.sort(Comparator.comparingDouble(a -> ((Book)a).getTotalRatingNumber()).reversed());
     List<Book> top10Books = sortedBooks.subList(0, Math.min(sortedBooks.size(), 10));
     recommendedBooks.addAll(top10Books);
+end
+
+rule "Users similarity based on Pearson correlation coefficient"
+salience 5
+no-loop true
+when
+    $user: User(id == specificUser.getId() && getRatingsNumber() >= 10)
+    $user2: User(id != specificUser.getId())
+    $books: List(size > 0) from collect(Book())
+then
+        System.out.println("Rule [Users similarity based on Pearson correlation coefficient] - fired");
+        double similarity = $user.calculateSimilarity($user2);
+        if (similarity >= 0.5) {
+            List<String> booksLikedBySimilarUser = $user2.getRatings().stream()
+                .filter(rating -> rating.getRating() >= 4.0)
+                .map(rating -> rating.getBook().getId().toString())
+                .collect(Collectors.toList());
+            List<Book> allBooks = new ArrayList<>($books);
+            List<Book> booksLikedByUser = new ArrayList<>();
+            for (String bookId : booksLikedBySimilarUser) {
+                for(Book book : allBooks){
+                    if(book.getId() == Long.parseLong(bookId)){
+                        booksLikedByUser.add(book);
+                    }
+                }
+                }
+            recommendedBooks.addAll(booksLikedByUser);
+        }
 end
