@@ -24,7 +24,24 @@ public class DroolsConfig {
         kieFileSystem.write(ResourceFactory.newClassPathResource(orderDiscountDrlFile));
         kieFileSystem.write(ResourceFactory.newClassPathResource(nonauthBooksDrlFile));
         kieFileSystem.write(ResourceFactory.newClassPathResource("rules/book-recommendations-with-favourites.drl"));
-        
+
+        KieBuilder kieBuilder = kieServices.newKieBuilder(kieFileSystem);
+        kieBuilder.buildAll();
+        KieModule kieModule = kieBuilder.getKieModule();
+
+        return kieServices.newKieContainer(kieModule.getReleaseId());
+    }
+
+    @Bean
+    public KieContainer kieContainerNewUser() {
+        KieServices kieServices = KieServices.Factory.get();
+
+        KieFileSystem kieFileSystem = kieServices.newKieFileSystem();
+        kieFileSystem.write(ResourceFactory.newClassPathResource(baseDrlFile));
+        kieFileSystem.write(ResourceFactory.newClassPathResource(orderDiscountDrlFile));
+        kieFileSystem.write(ResourceFactory.newClassPathResource(nonauthBooksDrlFile));
+        kieFileSystem.write(ResourceFactory.newClassPathResource("rules/book-recommendations-new-user.drl"));
+
         KieBuilder kieBuilder = kieServices.newKieBuilder(kieFileSystem);
         kieBuilder.buildAll();
         KieModule kieModule = kieBuilder.getKieModule();
