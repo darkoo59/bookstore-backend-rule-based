@@ -89,12 +89,21 @@ public class BookService {
         Optional<User> specificUser = userRepository.findByEmail(email);
         if(specificUser.isEmpty())
             throw new Exception("No user found");
+
+        List<Genre> genres = specificUser.get().getFavouriteGenres();
+
+        if(genres.isEmpty()){
+            List<Book> books = new ArrayList<>();
+            List<BookCharacteristics> list = getAllWithCharacteristics();
+            for(BookCharacteristics c: list){
+                books.add(c.getBook());
+            }
+            return books;
+        }
         if(specificUser.get().getRatings().size() < 10){
             return getRecommendedBooksForNewUser(specificUser.get());
         }
-        List<Genre> genres = specificUser.get().getFavouriteGenres();
-        if(genres.isEmpty())
-            return new ArrayList<>();
+
         List<Book> recommendedBooks = new ArrayList<>();
         ConcurrentHashMap<Book, Integer> recommendedBooksWithScores= new ConcurrentHashMap<Book, Integer>();
         KieSession kieSession = kieContainer.newKieSession();
