@@ -8,13 +8,14 @@ import java.util.List;
 import java.util.stream.Collectors
 import java.util.Comparator
 import java.util.ArrayList
-import java.util.Collections;
+import java.util.Collection
+import com.example.bookstorebackend.utils.helpers.NewUserRecommendationHelper;
 
 global java.util.ArrayList recommendedBooks;
 
 rule "Remove Authors Without Books"
 salience 30
-no-loop true
+no-loop
 when
     $author: Author(getBookNumber() == 0)
 then
@@ -24,59 +25,22 @@ end
 rule "Determine Author Genres"
 lock-on-active
 salience 25
+no-loop
 when
-    $author: Author()
-    $genres: List(size > 0) from collect(Genre())
+    $genre: Genre()
+    $author: Author(getBookNumberFromGenre($genre) * 1.0 / getBooksLength() > 0.3)
 then
-    boolean valid = false;
-    for(Object genre: $genres){
-        int count = $author.getBookNumberFromGenre((Genre)genre);
-        if((count * 1.0 / $author.getBooks().size()) > 0.3){
-            valid = true;
-        }
-    }
-    if(valid){
-        modify($author){setCorrectGenre(valid)}
-    }
+    modify($author){addGenre($genre)}
 end
 
-rule "Collect All Authors"
-salience 20
-no-loop true
-when
-    $authors: List(size > 0) from collect(Author(isCorrectGenre() == true))
-then
-    List<Author> authors = new ArrayList<>($authors);
-    authors.sort(Comparator.comparingDouble(a -> ((Author)a).getTotalRatingNumber()).reversed());
-    List<Author> sublist = authors.subList(0, Math.min(authors.size(), 4));
-    for(Object c: $authors){
-        delete(c);
-    }
-    for(Author author: sublist){
-        author.setPopular(true);
-        insert(author);
-    }
-end
-
-rule "Insert Books From Popular Authors"
+rule "Populate Recommended Books"
 salience 15
-no-loop true
+no-loop
 when
-  $author: Author(isPopular() == true)
+    $authors: List(size > 0) from collect(Author(getGenresLength() > 0))
+    $genres: List(size > 0) from collect(Genre())
+    eval(NewUserRecommendationHelper.sortAuthors($authors))
+    $books: List(size > 0) from collect(Book(getAuthor() memberOf $authors, getGenre() memberOf $genres))
 then
-    for(Book book: $author.getBooks()) {
-        insert(book);
-    }
-end
-
-rule "Select Top 10 Books"
-salience 10
-no-loop true
-when
-  $books: List(size > 0) from collect(Book())
-then
-    List<Book> sortedBooks = new ArrayList<>($books);
-    sortedBooks.sort(Comparator.comparingDouble(a -> ((Book)a).getAverageRating()).reversed());
-    List<Book> top10Books = sortedBooks.subList(0, Math.min(sortedBooks.size(), 10));
-    recommendedBooks.addAll(top10Books);
+    recommendedBooks.addAll(NewUserRecommendationHelper.sortBooks($books));
 end
