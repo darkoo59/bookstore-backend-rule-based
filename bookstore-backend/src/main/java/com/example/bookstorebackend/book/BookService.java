@@ -62,15 +62,20 @@ public class BookService {
         List<Genre> genres = user.getFavouriteGenres();
         if(genres.isEmpty())
             return new ArrayList<>();
+        List<Book> books = bookRepository.findAll();
+        if(books.isEmpty())
+            return new ArrayList<>();
 
-        List<Book> recommendedBooks = new ArrayList<>();
+        ArrayList<Book> recommendedBooks = new ArrayList<>();
         KieSession kieSession = kieContainerNewUser.newKieSession();
         kieSession.setGlobal("recommendedBooks", recommendedBooks);
-        List<Author> authors = authorRepository.findAll();
+        ArrayList<Author> authors = (ArrayList<Author>) authorRepository.findAll();
         for (Author author : authors)
             kieSession.insert(author);
         for ( Genre genre: genres)
             kieSession.insert(genre);
+        for ( Book book: books)
+            kieSession.insert(book);
         kieSession.fireAllRules();
 
         for (Book book : recommendedBooks){
@@ -79,7 +84,7 @@ public class BookService {
             System.out.println("Author: " + book.getAuthor().getName());
             System.out.println("##");
         }
-        System.out.println("*************");
+        System.out.println("####################################");
 
         kieSession.dispose();
         return recommendedBooks;

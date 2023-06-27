@@ -42,6 +42,7 @@ public class BookController {
             List<BookDTO> books = convertBooksToDTOs(bookService.getRecommendedBooks(email));
             return new ResponseEntity<>(books, OK);
         }catch (Exception e){
+            e.printStackTrace();
             return new ResponseEntity<>(BAD_REQUEST);
         }
     }
