@@ -33,11 +33,12 @@ Here're some of the project's best features:
 git clone https://github.com/darkoo59/bookstore-frontend-rule-based.git
 ```
 
-<p>2. Starting public project</p>
+<p>2. Starting project</p>
 
-```
-npm start
-```
+    💻 Using IntelliJ IDEA:
+       1.Open the project in IntelliJ IDEA.
+       2.Navigate to the BookstoreBackendApplication class in the project explorer.
+       3.Right-click on the class and select "Run BookstoreBackendApplication".
   
 <h2>💻 Built with</h2>
 
